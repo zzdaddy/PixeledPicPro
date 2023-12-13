@@ -1,31 +1,21 @@
 <div align='center'>
-<h1>Boot-Vue </h1>
-<img src='README.assets/logo.png' alt='Boot-Vue - Opinionated Vite Starter Template' width='344'/>
+<h1>Pixeled Pic Pro </h1>
+<img src='README.assets/touxiang12.jpeg' alt='Boot-Vue - Opinionated Vite Starter Template' width='344'/>
 </div>
 
 <p align='center'>
-Mocking up web app with <b>Boot-Vue </b><sup><em>(speed)</em></sup><br>
+关注公众号: 早早集市
+<br/>
+查看相关文章
 </p>
 
-<div align='center'>
-<b>English</b> | <a href="README.zh-CN.md">简体中文</a>
-</div>
 
-## Features
-
-- ⚡  [Lightning fast](https://github.com/kirklin/boot-vue#readme): Built with Vue 3, Vite, and pnpm 🔥
-- 💪 [Strongly typed](https://www.typescriptlang.org/): Uses TypeScript 💻
-- 🔥 [Latest syntax](https://github.com/vuejs/rfcs/pull/227): Uses the new <script setup> syntax 🆕
-- 📦 [Components auto importing](./src/components): Automatically imports components 🚚
-- 📥 [APIs auto importing](https://github.com/antfu/unplugin-auto-import): Uses unplugin-auto-import to directly import Composition API and others 📨
-- 🎨 [UnoCSS](https://unocss.dev/) - The instant on-demand atomic CSS engine, providing a lightweight and fast way to style your app.
-- 🌼 [Daisy](https://daisyui.com/) - The free and open-source Tailwind CSS component library
-- 💡 [Official router](https://router.vuejs.org/): Uses Vue Router v4 🛣️
-- 🎉 [Loading feedback](https://github.com/rstacruz/nprogress): Uses NProgress to provide page loading progress feedback 🔄
-- 🍍 [State management](https://pinia.esm.dev/): Uses Pinia for state management 🗃️
-- 📜 [Chinese font preset](https://github.com/kirklin/unocss-preset-chinese): Includes a preset for Chinese fonts 🇨🇳
-- 🌍 [I18n ready](./src/locales): Ready for internationalization with locales 🌎
-- ☁️ [Netlify ready](https://www.netlify.com/): Zero-config deployment on Netlify ☁️
+## 功能
+- 基于Konva
+- 生成12x12的方格子
+- 鼠标模式:标准/填充  填充时可上色, 标准时可拖拽
+- Tab键切换颜色
+- 导出图片
 
 ### Coding Style
 
@@ -37,9 +27,8 @@ Mocking up web app with <b>Boot-Vue </b><sup><em>(speed)</em></sup><br>
 - 💻 [VSCode](https://code.visualstudio.com/)
 - 💡 [Volar](https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.volar)
 
-### Performance
-<img src='README.assets/BootVue-Lighthouse.png' alt='Boot-Vue Outstanding performance' width='1851'/>
-
+### 功能预览
+<img src='README.assets/yanshi.gif' alt='pixeled pic pro'/>
 
 ## directory
 
@@ -92,14 +81,6 @@ Mocking up web app with <b>Boot-Vue </b><sup><em>(speed)</em></sup><br>
 
 [Create a repo from this template on GitHub](https://github.com/kirklin/boot-vue/generate).
 
-### Clone to local
-
-```bash
-npx degit kirklin/boot-vue my-app
-cd my-app
-pnpm i
-```
-
 ## Usage
 
 ### Development
@@ -139,3 +120,7 @@ Run the image and specify port mapping with the `-p` flag.
 docker run --rm -it -p 8080:80 viteboot:latest
 ```
 
+## 版本更新
+
+### v0.6.0
+实现了基本功能
