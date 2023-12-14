@@ -1,4 +1,4 @@
-import { Ref } from "vue";
+import type { Ref } from "vue";
 import Konva from "konva";
 
 // canvas容器属性
@@ -58,6 +58,7 @@ export class AppStage {
     y1: 0,
     y2: 0,
   };
+
   fillConfig?: FillConfig;
   fillStatus?: FillStatus;
   scaleMember: any; // 可缩放对象, 设置鼠标滚动缩放的对象, 默认为layer
@@ -73,7 +74,7 @@ export class AppStage {
       mouseMode: "basic",
       scale: false,
       scaleMember: null,
-    }
+    },
   ) {
     this.containerRef = ref.value;
     this.canvasWindow = {
@@ -91,16 +92,24 @@ export class AppStage {
     // 添加进一个基础图层
     this.createBaseLayer();
     // 创建动画层
-    if (options.hasAnimateShapes) this.createAnimateLayer();
+    if (options.hasAnimateShapes) {
+      this.createAnimateLayer();
+    }
 
     // 分配鼠标全局事件
-    if (options.isAllowMouseSelectShapes) this.listenAndAssignTask(null);
+    if (options.isAllowMouseSelectShapes) {
+      this.listenAndAssignTask(null);
+    }
 
     // 绑定选择器
-    if (options.isInitTransformer) this.bindStageTransformerToggle();
+    if (options.isInitTransformer) {
+      this.bindStageTransformerToggle();
+    }
 
     // 绑定键盘事件
-    if (options.isInitKeyboardEvents) this.bindKeyboardEvent();
+    if (options.isInitKeyboardEvents) {
+      this.bindKeyboardEvent();
+    }
 
     // 是否可缩放 stage
     if (options.scale) {
@@ -108,10 +117,11 @@ export class AppStage {
       this.listenScaleEvent();
     }
   }
+
   // 初始化画板
   init(options: AppStageConfig) {
     console.log(
-      `初始化容器为: ${this.canvasWindow.width} x ${this.canvasWindow.height}`
+      `初始化容器为: ${this.canvasWindow.width} x ${this.canvasWindow.height}`,
     );
     this.stage = new Konva.Stage({
       container: this.containerRef,
@@ -146,41 +156,55 @@ export class AppStage {
   }
 
   createBaseLayer() {
-    let layer = new Konva.Layer();
+    const layer = new Konva.Layer();
     this.baseLayer = layer;
     this.stage.add(layer);
   }
 
   draw(layerName: layerName = "base") {
-    if (layerName === "base") this.baseLayer.draw();
-    if (layerName === "animate") this.animateLayer.draw();
+    if (layerName === "base") {
+      this.baseLayer.draw();
+    }
+    if (layerName === "animate") {
+      this.animateLayer.draw();
+    }
   }
 
   batchDraw(layerName: layerName = "base") {
-    if (layerName === "base") this.baseLayer.batchDraw();
-    if (layerName === "animate") this.animateLayer.batchDraw();
+    if (layerName === "base") {
+      this.baseLayer.batchDraw();
+    }
+    if (layerName === "animate") {
+      this.animateLayer.batchDraw();
+    }
   }
 
   // 创建动画层 暂时没有用到
   createAnimateLayer() {
-    let layer = new Konva.Layer();
+    const layer = new Konva.Layer();
     this.animateLayer = layer;
     this.stage.add(layer);
   }
+
   // 控件
   // TS Konva.Node
   createTransformer(node: any) {
-    let transformer = new Konva.Transformer();
+    const transformer = new Konva.Transformer();
     this.baseLayer.add(transformer);
     transformer.nodes([].concat(node));
     this.baseLayer.draw();
   }
+
   // 创建图形
   createShape(shape: any) {
-    if (!shape) return;
-    let shapes = [].concat(shape);
+    if (!shape) {
+      return;
+    }
+    const shapes = [].concat(shape);
     shapes.forEach((item: any) => {
-      if (!item.name) item.name("common-shape");
+      if (!item.name) {
+        item.name("common-shape");
+      }
     });
     // console.log(`增加图形 name:[${shape.name()}]`)
     this.baseLayer.add(...shapes);
@@ -188,8 +212,10 @@ export class AppStage {
   }
 
   createShapesByGroup(group: any, shape: any) {
-    if (!group || !shape) return;
-    let shapes = [].concat(shape);
+    if (!group || !shape) {
+      return;
+    }
+    const shapes = [].concat(shape);
     group.add(...shapes);
     this.baseLayer.add(group);
     this.batchDraw();
@@ -197,9 +223,11 @@ export class AppStage {
 
   // 删除图形
   removeNodes() {
-    let transformers = this.stage.find("Transformer");
-    if (!transformers.length) return;
-    // @ts-ignore
+    const transformers = this.stage.find("Transformer");
+    if (!transformers.length) {
+      return;
+    }
+    // @ts-expect-error
     transformers.forEach((tranformer: Konva.Transformer) => {
       tranformer.nodes().forEach((node) => {
         node?.remove();
@@ -209,8 +237,13 @@ export class AppStage {
   }
 
   clearAllBaseShapes() {
-    this.baseLayer.clear()
+    console.log(`删除图层并重建`)
+    // clear不会清除node
+    this.baseLayer.destroy();
+    this.createBaseLayer();
+    // this.draw()
   }
+
   /**
    *
    * @param imgUrl file url
@@ -228,14 +261,14 @@ export class AppStage {
         let height = imageObj.height;
         if (width > this.importImageConfig.initMaxWidth) {
           // 缩小比例
-          let downRatio = this.importImageConfig.initMaxWidth / width;
+          const downRatio = this.importImageConfig.initMaxWidth / width;
           width = this.importImageConfig.initMaxWidth;
           height = height * downRatio;
         }
 
         if (height > this.importImageConfig.initMaxHeight) {
           // 缩小比例
-          let downRatio = this.importImageConfig.initMaxHeight / height;
+          const downRatio = this.importImageConfig.initMaxHeight / height;
           height = this.importImageConfig.initMaxHeight;
           width = width * downRatio;
         }
@@ -244,8 +277,8 @@ export class AppStage {
           x,
           y,
           image: imageObj,
-          width: width,
-          height: height,
+          width,
+          height,
           draggable: true,
           name: "common-shape",
         });
@@ -258,10 +291,12 @@ export class AppStage {
   }
 
   setTransformerZIndex(mode: ZIndexMoveMode = "top") {
-    let transformers = this.stage.find("Transformer");
-    if (!transformers.length) return;
+    const transformers = this.stage.find("Transformer");
+    if (!transformers.length) {
+      return;
+    }
     // moveUp moveDown moveToBottom moveToTop
-    // @ts-ignore 忽略ts检测
+    // @ts-expect-error 忽略ts检测
     transformers.forEach((item: Konva.Transformer) => {
       item.nodes().forEach((node: Konva.Node) => {
         switch (mode) {
@@ -302,6 +337,7 @@ export class AppStage {
     });
     console.log("已绑定键盘事件");
   }
+
   // 绑定全局的点击事件
   // 1. 点击图形创建控件
   // 2. 点击空白消除空间
@@ -309,7 +345,7 @@ export class AppStage {
     this.stage.on("click", (e: any) => {
       if (e.target.id() === this.stage.id()) {
         // 点击空白区域, 循环destory transformer
-        let transformers = this.stage.find("Transformer");
+        const transformers = this.stage.find("Transformer");
         transformers.forEach((item) => {
           item.destroy();
         });
@@ -327,12 +363,14 @@ export class AppStage {
     this.stage.off("mouseup");
 
     if (this.drawTaget) {
-        this.drawTaget.off('mousedown')
+      this.drawTaget.off("mousedown");
     }
   }
+
   switchMouseMode(mouseMode: MouseMode) {
     this.mouseMode = mouseMode;
   }
+
   // 监听 然后 分配操作
   // 如互斥的操作
   // 1. 正常模式下 鼠标可以框选
@@ -343,6 +381,7 @@ export class AppStage {
     this.destoryMouseEvent();
     switch (this.mouseMode) {
       case "basic":
+        return;
       case "clip":
         this.listenAndCreateClipRectSelector(callback);
       case "draw":
@@ -363,13 +402,13 @@ export class AppStage {
   listenScaleEvent() {
     // 鼠标滚动时, 放大整个画布
     this.stage.on("wheel", (e) => {
-      let max = 20; // 放大最大的比例
-      let min = 1; // 缩小最小的比例
-      let step = 0.1; // 每次缩放的比例
+      const max = 20; // 放大最大的比例
+      const min = 1; // 缩小最小的比例
+      const step = 0.1; // 每次缩放的比例
       const evt = e.evt;
-      //@ts-ignore
+      // @ts-expect-error
       if (evt.wheelDelta) {
-        //@ts-ignore
+        // @ts-expect-error
         if (evt.wheelDelta > 0) {
           // 放大
           if (this.scaleMember.scaleX() < max) {
@@ -405,6 +444,7 @@ export class AppStage {
       this.rectSelectorEnd(callback);
     });
   }
+
   // 自定义矩形选择框, 框选多选多个图形同时操作
   listenAndCreateRectSelector() {
     this.stage.on("mousedown", (e: any) => {
@@ -433,7 +473,7 @@ export class AppStage {
       // 绘图时禁止冒泡, 防止拖拽
       e.cancelBubble = true;
       if (this.mouseMode !== "fill") {
-        this.drawTaget.off('mousedown')
+        this.drawTaget.off("mousedown");
         return;
       };
       //   console.log(`鼠标落下e.target`, e.target)
@@ -444,6 +484,8 @@ export class AppStage {
         if (this.fillStatus === "filling") {
           //   console.log(`鼠标移动e.target`, e, e.target)
           e.target.fill(this.fillConfig?.color);
+
+          this.batchDraw()
         }
 
         // this.drawTaget.getIntersection()
@@ -462,7 +504,9 @@ export class AppStage {
   // 清除填充色
   clearFilledRects(option: any) {
     // 没有涂色区域，退出
-    if (!this.drawTaget) return;
+    if (!this.drawTaget) {
+      return;
+    }
     // 没有选项， 清除全部
     if (!option) {
       this.drawTaget.getChildren().forEach((node: Konva.Rect) => {
@@ -470,9 +514,9 @@ export class AppStage {
       });
     }
   }
+
   // 矩形选择框拖拽开始
   rectSelectorStart() {
-    console.log("=== 框选开始 ===");
     // 特别注意 Konva最新版本中 删除元素使 remove
     this.rectSelector?.remove();
     this.rectSelector = new Konva.Rect({
@@ -485,7 +529,7 @@ export class AppStage {
     this.baseLayer.add(this.rectSelector);
     const position = this.stage.getPointerPosition();
     if (position) {
-      let { x, y } = position;
+      const { x, y } = position;
       this.rectSelectorPosition.x1 = x;
       this.rectSelectorPosition.x2 = x;
       this.rectSelectorPosition.y1 = y;
@@ -496,9 +540,13 @@ export class AppStage {
 
   // 矩形选择框拖拽移动
   rectSelectorMove() {
-    if (!this.rectSelector) return;
+    if (!this.rectSelector) {
+      return;
+    }
 
-    if (!this.rectSelector.visible()) return;
+    if (!this.rectSelector.visible()) {
+      return;
+    }
     const position = this.stage.getPointerPosition();
 
     if (position) {
@@ -517,11 +565,14 @@ export class AppStage {
 
   // 矩形选择框拖拽结束
   rectSelectorEnd(callback: Function | null) {
-    console.log("=== 框选结束 ===");
 
-    if (!this.rectSelector) return;
-    if (!this.rectSelector.visible()) return;
-    let attrs = this.rectSelector.getAttrs();
+    if (!this.rectSelector) {
+      return;
+    }
+    if (!this.rectSelector.visible()) {
+      return;
+    }
+    const attrs = this.rectSelector.getAttrs();
     this.rectSelector.visible(false);
 
     if (this.mouseMode === "basic") {
@@ -532,21 +583,23 @@ export class AppStage {
       this.rectClipSelectorEnd(attrs, callback);
     }
   }
+
   rectCommonSelectorEnd() {
     // this.baseLayer.draw()
     const shapes = this.stage.find(".common-shape");
     const box = this.rectSelector.getClientRect();
     // 过滤出和框选矩形有重合的图形
-    const selected = shapes.filter((shape) =>
-      Konva.Util.haveIntersection(box, shape.getClientRect())
+    const selected = shapes.filter(shape =>
+      Konva.Util.haveIntersection(box, shape.getClientRect()),
     );
     // 为所有框选的图形创建一个统一的控件
     this.createTransformer(selected);
   }
+
   // 框选并截取事件结束, 画一个矩形, 并返回矩形信息, 导出时作为参数传一下
   rectClipSelectorEnd(option: Konva.NodeConfig, callback: Function | null) {
-    let { x, y, width, height } = option;
-    let rectOption = {
+    const { x, y, width, height } = option;
+    const rectOption = {
       x,
       y,
       width,
@@ -568,6 +621,7 @@ export class AppStage {
       });
     }
   }
+
   // 转dataURL 用于导出
   toDataURL(options = {}) {
     return this.stage.toDataURL(options);

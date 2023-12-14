@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Navbar from "./Navbar/index.vue";
+
 // import Footer from "./Footer/index.vue";
 
 defineOptions({
