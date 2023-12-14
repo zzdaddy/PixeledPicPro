@@ -3,7 +3,8 @@ import ThemeChange from "./components/ThemeChange/index.vue";
 
 // import LocalesChange from "./components/LocalesChange/index.vue";
 import UnoCSSIconButton from "~/components/Icon/UnoCSSIconButton.vue";
-
+// @ts-ignore
+const version = ref({ __APP_VERSION__ })
 defineOptions({
   name: "Navbar",
 });
@@ -27,6 +28,7 @@ defineOptions({
             <span class="text-primary">P<span class="lowercase">ixeled</span></span>
             <span class="text-accent-content">P<span class="lowercase">ic</span></span>
             <span class="text-accent-content">P<span class="lowercase">ro</span></span>
+            <sup><em class="text-xs">{{  version.__APP_VERSION__  }}</em></sup>
           </div>
         </RouterLink>
       </div>
