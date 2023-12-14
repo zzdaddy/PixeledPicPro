@@ -6,94 +6,39 @@
 <p align='center'>
 关注公众号: 早早集市
 <br/>
-查看相关文章
+查看相关实战文章
 </p>
 
+[点击查看版本更新](https://github.com/zzdaddy/PixeledPicPro?tab=readme-ov-file#%E7%89%88%E6%9C%AC%E6%9B%B4%E6%96%B0) 或直接拉到最底部
 
-## 功能
-- 基于Konva
-- 生成12x12的方格子
+## 最新功能
+- 基于Konva(目前)
+- 生成自定义行x列的方格子
+- Toast组件
 - 鼠标模式:标准/填充  填充时可上色, 标准时可拖拽
-- Tab键切换颜色
+- 空格键切换颜色
 - 导出图片
 
-### Coding Style
+### 功能预览(最初版)
+[在线体验最新版](https://zzstudio.cn/stall/pixeled-pic-pro/#/home)
 
-- [@kirklin/eslint-config](https://github.com/kirklin/eslint-config)
-
-### Recommended IDE Setup
-
-- 🌪️ [WebStorm](https://www.jetbrains.com/webstorm/)
-- 💻 [VSCode](https://code.visualstudio.com/)
-- 💡 [Volar](https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.volar)
-
-### 功能预览
 <img src='README.assets/yanshi.gif' alt='pixeled pic pro'/>
 
-## directory
+### 基于模版
+[boot-vue](https://github.com/kirklin/boot-vue)
+点击查看目录结构, 以及基于哪些插件打造
 
-```
-# boot-vue
-├─.github                                # Stores GitHub related configuration files.
-│  ├─ISSUE_TEMPLATE                       # GitHub Issue templates
-│  └─workflows                            # GitHub Actions related configuration files
-├─.husky                                  # Stores Git Hooks related configuration files
-│  └─_                                    # Stores Git Hooks execution scripts
-├─.idea                                   # Stores IntelliJ IDEA related configuration files
-│  ├─codeStyles                           # Stores code formatting rules
-│  └─inspectionProfiles                  # Stores code inspection rules
-├─.vscode                                 # Stores VS Code related configuration files
-├─public                                  # Stores static resources required by the web application
-├─README.assets                           # Stores images and other resources used by README.md
-├─src                                     # Stores the source code of the web application
-│  ├─assets                               # Stores static resources required by the web application
-│  ├─components                           # Stores the components of the web application
-│  │  └─Icon                              # Stores the components representing icons
-│  ├─config                               # Stores the configuration files of the web application
-│  │  ├─nprogress                         # Stores the configuration file of the progress bar library NProgress
-│  │  └─unocss                            # Stores the configuration file of the UnoCSS
-│  ├─constant                             # Stores the constant values used in the web application
-│  ├─layouts                              # Stores the layout components of the web application
-│  │  ├─Footer                            # Stores the layout component representing the footer of the page
-│  │  └─Navbar                            # Stores the layout component representing the navigation bar of the page
-│  │      └─components                    # Stores the child components of the Navbar layout component
-│  │          ├─LocalesChange             # Stores the child component representing language switch
-│  │          └─ThemeChange               # Stores the child component representing theme switch
-│  ├─locales                              # Stores the content files of the web application's multiple languages
-│  ├─router                               # Stores the routing configuration files of the web application
-│  │  └─routes                            # Stores the modules of the web application's routes
-│  │      └─modules                       # Stores the sub-modules of the routing modules of the web application
-│  ├─store                                # Stores the state management files of the web application
-│  ├─styles                               # Stores the style files of the web application
-│  └─views                                # Stores the page components of the web application
-│      ├─errorPages                       # Stores the components representing error pages
-│      └─home                             # Stores the components representing the homepage
-│          └─components                   # Stores the child components of the homepage components
-├─test                                    # Stores the test code
-│  └─__snapshots__                        # Stores the Jest snapshot test results
-└─types                                   # Stores the TypeScript type declaration files
+### 开发
 
-```
-
-## Try it now!
-
-### GitHub Template
-
-[Create a repo from this template on GitHub](https://github.com/kirklin/boot-vue/generate).
-
-## Usage
-
-### Development
-
-Just run and visit http://localhost:8888
+运行后打开 http://localhost:8888
 
 ```bash
 pnpm run dev
 ```
 
-### Build
+### 打包
 
-To build the App, run
+run
 
 ```bash
 pnpm run build
