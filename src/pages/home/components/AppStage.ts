@@ -237,7 +237,7 @@ export class AppStage {
   }
 
   clearAllBaseShapes() {
-    console.log(`删除图层并重建`)
+    console.log(`删除图层并重建`);
     // clear不会清除node
     this.baseLayer.destroy();
     this.createBaseLayer();
@@ -485,7 +485,7 @@ export class AppStage {
           //   console.log(`鼠标移动e.target`, e, e.target)
           e.target.fill(this.fillConfig?.color);
 
-          this.batchDraw()
+          this.batchDraw();
         }
 
         // this.drawTaget.getIntersection()
@@ -565,7 +565,6 @@ export class AppStage {
 
   // 矩形选择框拖拽结束
   rectSelectorEnd(callback: Function | null) {
-
     if (!this.rectSelector) {
       return;
     }
