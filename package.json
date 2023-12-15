@@ -17,6 +17,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "version:patch": "npm version patch",
+    "version:minor": "npm version minor",
+    "version:major": "npm version major",
     "typecheck": "vue-tsc --noEmit",
     "preview": "vite preview",
     "lint": "eslint .",
