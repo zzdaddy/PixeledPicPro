@@ -65,6 +65,13 @@ Run the image and specify port mapping with the `-p` flag.
 docker run --rm -it -p 8080:80 viteboot:latest
 ```
 
+```
+移除
+"lint-staged": {
+    "**/*": "eslint --fix"
+  }
+```
+
 ## 版本更新
 ### v0.8.0
 - Toast组件可以被重复使用

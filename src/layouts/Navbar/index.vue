@@ -3,11 +3,12 @@ import ThemeChange from "./components/ThemeChange/index.vue";
 
 // import LocalesChange from "./components/LocalesChange/index.vue";
 import UnoCSSIconButton from "~/components/Icon/UnoCSSIconButton.vue";
-// @ts-ignore
-const version = ref({ __APP_VERSION__ })
+
 defineOptions({
   name: "Navbar",
 });
+// @ts-expect-error
+const version = ref({ __APP_VERSION__ });
 </script>
 
 <template>
@@ -28,14 +29,14 @@ defineOptions({
             <span class="text-primary">P<span class="lowercase">ixeled</span></span>
             <span class="text-accent-content">P<span class="lowercase">ic</span></span>
             <span class="text-accent-content">P<span class="lowercase">ro</span></span>
-            <sup><em class="text-xs">{{  version.__APP_VERSION__  }}</em></sup>
+            <sup><em class="text-xs">{{ version.__APP_VERSION__ }}</em></sup>
           </div>
         </RouterLink>
       </div>
       <div>
         <ThemeChange />
         <!-- <LocalesChange /> -->
-        <span id="busuanzi_container_site_pv">总访问量:<span id="busuanzi_value_site_pv"></span>人</span>
+        <span id="busuanzi_container_site_pv">总访问量:<span id="busuanzi_value_site_pv" />人</span>
 
         <span
           class="tooltip tooltip-bottom before:text-xs before:content-[attr(data-tip)]"

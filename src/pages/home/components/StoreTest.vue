@@ -59,7 +59,15 @@ const awsomePreset = ref([
       xCount: 15,
       yCount: 24,
     },
-    colors: ["#564A54", "#DDDBED", "#1C1A25", "#DDB3C0", "#908B96", "#CC7A76", "#ffffff"],
+    colors: [
+      "#564A54",
+      "#DDDBED",
+      "#1C1A25",
+      "#DDB3C0",
+      "#908B96",
+      "#CC7A76",
+      "#ffffff",
+    ],
   },
 ]);
 
@@ -80,8 +88,12 @@ async function initStage() {
 function genRectPixelBox() {
   Stage.value.clearAllBaseShapes();
   isFillMode.value = false;
-  basicCellConfig.xCount = isNaN(+basicCellConfig.xCount) ? 0 : +basicCellConfig.xCount;
-  basicCellConfig.yCount = isNaN(+basicCellConfig.yCount) ? 0 : +basicCellConfig.yCount;
+  basicCellConfig.xCount = isNaN(+basicCellConfig.xCount)
+    ? 0
+    : +basicCellConfig.xCount;
+  basicCellConfig.yCount = isNaN(+basicCellConfig.yCount)
+    ? 0
+    : +basicCellConfig.yCount;
   PixelRectGroup.value = new Konva.Group({
     x: 500,
     y: 200,
@@ -114,11 +126,12 @@ function genPixelBoxCells() {
   const { x, y, strokeWidth: border } = PixelRect.value?.getAttrs();
   const cells = [];
   logger.info(`当前数量 => ${basicCellConfig.xCount * basicCellConfig.yCount}`);
-  if ((basicCellConfig.xCount * basicCellConfig.yCount) > 2000) {
-    toast.value && toast.value.show({
-      type: "error",
-      msg: "数量过多时会有明显卡顿和掉帧, 请调整数量大小",
-    });
+  if (basicCellConfig.xCount * basicCellConfig.yCount > 2000) {
+    toast.value
+      && toast.value.show({
+        type: "error",
+        msg: "数量过多时会有明显卡顿和掉帧, 请调整数量大小",
+      });
   }
   for (let xIndex = 0; xIndex < basicCellConfig.xCount; xIndex++) {
     for (let yIndex = 0; yIndex < basicCellConfig.yCount; yIndex++) {
@@ -150,12 +163,14 @@ function exportImage() {
   PixelRectGroup.value.scaleX(1);
   PixelRectGroup.value.scaleY(1);
   if (isClearBorder.value) {
-    PixelRectGroup.value.getChildren((node: Konva.Rect) => {
-      return node.getAttr("name").includes("fillnode");
-    }).forEach((rect: Konva.Rect) => {
-      rect.setAttr("strokeWidth", 0);
-      Stage.value.batchDraw();
-    });
+    PixelRectGroup.value
+      .getChildren((node: Konva.Rect) => {
+        return node.getAttr("name").includes("fillnode");
+      })
+      .forEach((rect: Konva.Rect) => {
+        rect.setAttr("strokeWidth", 0);
+        Stage.value.batchDraw();
+      });
   }
   nextTick(() => {
     // 获取位置
@@ -171,12 +186,14 @@ function exportImage() {
     downloadPNGForCanvas(dataURL, "测试");
 
     if (isClearBorder.value) {
-      PixelRectGroup.value.getChildren((node: Konva.Rect) => {
-        return node.getAttr("name").includes("fillnode");
-      }).forEach((rect: Konva.Rect) => {
-        rect.setAttr("strokeWidth", basicCellConfig.border);
-        Stage.value.batchDraw();
-      });
+      PixelRectGroup.value
+        .getChildren((node: Konva.Rect) => {
+          return node.getAttr("name").includes("fillnode");
+        })
+        .forEach((rect: Konva.Rect) => {
+          rect.setAttr("strokeWidth", basicCellConfig.border);
+          Stage.value.batchDraw();
+        });
     }
   });
 }
@@ -192,7 +209,7 @@ function changeMode(e: any) {
 }
 
 function setBorderVisibleForExport(e: any) {
-    console.log(`e.target.checked`, e.target.checked)
+  console.log(`e.target.checked`, e.target.checked);
   isClearBorder.value = e.target.checked;
 }
 // 更改当前颜色
@@ -214,7 +231,11 @@ function selectPreset(name: presetName) {
 function checkPreset(preset: any) {
   const checkKeys = ["name", "colors", "cellConfig"];
   if (checkKeys.every(key => preset.hasOwnProperty(key))) {
-    if (typeof preset.name === "string" && Array.isArray(preset.colors) && preset.cellConfig instanceof Object) {
+    if (
+      typeof preset.name === "string"
+      && Array.isArray(preset.colors)
+      && preset.cellConfig instanceof Object
+    ) {
       return true;
     }
   }
@@ -272,7 +293,9 @@ function loadLocalPreset() {
       // 检测合法性, 没问题的话, 直接应用
       if (presets.every((preset: any) => checkPreset(preset))) {
         // 去重, name一样会被去掉, 本地优先
-        const newPresets = filterNoRepeatPresets(presets.concat(awsomePreset.value));
+        const newPresets = filterNoRepeatPresets(
+          presets.concat(awsomePreset.value),
+        );
         awsomePreset.value = newPresets.concat();
       }
     } catch (err) {
@@ -294,10 +317,15 @@ watch(pastePreset, (json) => {
     // 检测合法性, 没问题的话, 直接应用
     if (checkPreset(preset)) {
       // 去重
-      const newPresets = filterNoRepeatPresets(awsomePreset.value.concat(preset));
+      const newPresets = filterNoRepeatPresets(
+        awsomePreset.value.concat(preset),
+      );
       awsomePreset.value = newPresets.concat();
       // 存本地
-      localStorage.setItem("ZZSTUDIO_PPP_PRESETS", JSON.stringify(awsomePreset.value));
+      localStorage.setItem(
+        "ZZSTUDIO_PPP_PRESETS",
+        JSON.stringify(awsomePreset.value),
+      );
       // 选中
       selectPreset(preset.name);
       presetSelector.value.setValue(preset.name);
@@ -319,12 +347,15 @@ watch(pastePreset, (json) => {
 function bindKeyboardEvent() {
   window.addEventListener("keydown", (e) => {
     if (e.code === "Space") {
-      let index = colorConfig.value.findIndex(color => color === selectColor.value);
+      let index = colorConfig.value.findIndex(
+        color => color === selectColor.value,
+      );
       index = index >= colorConfig.value.length - 1 ? 0 : index + 1;
       changeColor(colorConfig.value[index]);
     }
   });
 }
+
 onMounted(() => {
   initStage();
   bindKeyboardEvent();
@@ -337,42 +368,90 @@ onMounted(() => {
   <div ref="canvasContainerRef" class="flex-1" />
 
   <div class="fixed right-[30px] top-[130px] z-999 max-w-40 flex flex-col">
-    <button class="mb-2 btn btn-md btn-primary" @click="genRectPixelBox">
+    <button class="mb-2 btn btn-primary btn-md" @click="genRectPixelBox">
       生成!(会清空)
     </button>
-    <Select ref="presetSelector" title="优秀预设" :options="awsomePreset" @change="selectPreset" />
+    <Select
+      ref="presetSelector"
+      title="优秀预设"
+      :options="awsomePreset"
+      @change="selectPreset"
+    />
     <div class="mouse-mode mt-2 flex items-center justify-center">
-      <span :class="[!isFillMode ? 'font-500 text-xl' : '']">标准</span><input type="checkbox" class="toggle" :checked="isFillMode" @change="changeMode"> <span :class="[isFillMode ? 'font-500 text-xl' : '']">填充</span>
+      <span :class="[!isFillMode ? 'font-500 text-xl' : '']">标准</span><input
+        type="checkbox"
+        class="toggle"
+        :checked="isFillMode"
+        @change="changeMode"
+      >
+      <span :class="[isFillMode ? 'font-500 text-xl' : '']">填充</span>
     </div>
     <div class="setting mt-2">
-      <span class="text-sm font-500">导出去边框</span><input type="checkbox" class="toggle" :checked="isClearBorder" @change="setBorderVisibleForExport">
+      <span class="text-sm font-500">导出去边框</span><input
+        type="checkbox"
+        class="toggle"
+        :checked="isClearBorder"
+        @change="setBorderVisibleForExport"
+      >
     </div>
-    <div class="color-picker mt-2 min-h-18 flex flex-wrap items-end border border-primary border-dashed p-1">
+    <div
+      class="color-picker mt-2 min-h-18 flex flex-wrap items-end border border-primary border-dashed p-1"
+    >
       <div
-        v-for="color in colorConfig" class="mb-1 mr-1 h-4 w-4 border border-accent-content transition" :class="[selectColor === color ? 'w-8 h-8' : '']" :style="{ backgroundColor: color }" @click="changeColor(color)"
+        v-for="color in colorConfig"
+        class="mb-1 mr-1 h-4 w-4 border border-accent-content transition"
+        :class="[selectColor === color ? 'w-8 h-8' : '']"
+        :style="{ backgroundColor: color }"
+        @click="changeColor(color)"
       />
     </div>
     <div class="countxy mt-2 flex items-center justify-center">
-      <input v-model="basicCellConfig.xCount" type="text" placeholder="横" class="mr-2 max-w-xs w-12 text-4 text-primary font-bold input input-sm">
+      <input
+        v-model="basicCellConfig.xCount"
+        type="text"
+        placeholder="横"
+        class="mr-2 max-w-xs w-12 text-4 text-primary font-bold input input-sm"
+      >
       <span> X </span>
-      <input v-model="basicCellConfig.yCount" type="text" placeholder="纵" class="ml-2 max-w-xs w-12 text-4 text-primary font-bold input input-sm">
+      <input
+        v-model="basicCellConfig.yCount"
+        type="text"
+        placeholder="纵"
+        class="ml-2 max-w-xs w-12 text-4 text-primary font-bold input input-sm"
+      >
     </div>
     <div class="relative">
-      <textarea v-show="false" v-model="copyPreset" class="absolute left--60 textarea textarea-primary textarea-md" placeholder="json" />
+      <textarea
+        v-show="false"
+        v-model="copyPreset"
+        class="absolute left--60 textarea textarea-primary textarea-md"
+        placeholder="json"
+      />
       <button class="mt-2 w-full btn btn-primary" @click="exportPreset">
-        {{ isSupported ? '导出预设' : '不支持导出' }}
+        {{ isSupported ? "导出预设" : "不支持导出" }}
       </button>
     </div>
 
     <div class="relative mt-2">
       <!-- <textarea v-if="showPasteTextarea" v-model="pastePreset" class="absolute left--60 textarea textarea-md textarea-primary" placeholder="json"></textarea> -->
-      <div class="tooltip-top w-full tooltip" data-tip="复制到输入框内会自动导入">
+      <div
+        class="tooltip-top w-full tooltip"
+        data-tip="复制到输入框内会自动导入"
+      >
         <div class="w-full dropdown dropdown-left">
           <div tabindex="0" role="button" class="w-full btn btn-primary">
             导入预设
           </div>
-          <div tabindex="0" class="dropdown-content z-[1] bg-base-100 p-2 shadow menu rounded-box">
-            <textarea v-if="showPasteTextarea" v-model="pastePreset" class="textarea textarea-primary textarea-md" placeholder="json" />
+          <div
+            tabindex="0"
+            class="dropdown-content z-[1] bg-base-100 p-2 shadow menu rounded-box"
+          >
+            <textarea
+              v-if="showPasteTextarea"
+              v-model="pastePreset"
+              class="textarea textarea-primary textarea-md"
+              placeholder="json"
+            />
           </div>
         </div>
       </div>

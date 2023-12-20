@@ -8,18 +8,19 @@ import IconsResolver from "unplugin-icons/resolver";
 import Inspect from "vite-plugin-inspect";
 import { VitePWA } from "vite-plugin-pwa";
 import VueDevTools from "vite-plugin-vue-devtools";
-// import packageJson from './package.json';
-const packageJson = require('./package.json');
 
 // vite.config.ts
 import VueI18nPlugin from "@intlify/unplugin-vue-i18n/vite";
 import UnoCss from "unocss/vite";
 
+// import packageJson from './package.json';
+const packageJson = require("./package.json");
+
 // https://vitejs.dev/config/
 export default defineConfig({
   base: "./",
   define: {
-    __APP_VERSION__: JSON.stringify(packageJson.version)
+    __APP_VERSION__: JSON.stringify(packageJson.version),
   },
   server: {
     host: "localhost",
