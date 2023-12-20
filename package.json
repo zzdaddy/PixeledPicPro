@@ -60,7 +60,6 @@
     "@vue/compiler-dom": "^3.3.10",
     "@vue/test-utils": "^2.4.3",
     "eslint": "^8.55.0",
-    "husky": "^8.0.3",
     "jsdom": "^23.0.1",
     "lint-staged": "^15.2.0",
     "pnpm": "^8.11.0",
