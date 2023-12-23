@@ -27,12 +27,12 @@
     "test": "vitest",
     "test:unit": "vitest",
     "test:coverage": "vitest run --coverage",
-    "prepare": "husky install",
     "preinstall": "npx only-allow pnpm"
   },
   "dependencies": {
     "@kirklin/logger": "^0.0.2",
     "@kirklin/reset-css": "^0.0.3",
+    "@leafer-ui/interface": "1.0.0-rc.8",
     "@vueuse/core": "^10.7.0",
     "axios": "^1.6.2",
     "daisyui": "^3.9.4",

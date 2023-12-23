@@ -11,6 +11,9 @@ dependencies:
   '@kirklin/reset-css':
     specifier: ^0.0.3
     version: 0.0.3
+  '@leafer-ui/interface':
+    specifier: 1.0.0-rc.8
+    version: 1.0.0-rc.8
   '@vueuse/core':
     specifier: ^10.7.0
     version: 10.7.0(vue@3.3.10)

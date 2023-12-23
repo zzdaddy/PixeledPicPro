@@ -1,11 +1,10 @@
 <script lang="ts" setup>
 import { nextTick, onMounted, reactive, ref } from "vue";
-import Konva from "konva";
 import { useClipboard } from "@vueuse/core";
 import { logger } from "@kirklin/logger";
-import { AppStage } from "./AppStage";
 import { downloadPNGForCanvas } from "~/utils/canvas";
-
+import { Rect, Canvas, UI, Frame, Box, PointerEvent } from "leafer-ui";
+import { LeaferController, MouseMode } from "./LeaferController";
 // const permissionRead = usePermission('clipboard-read')
 // const permissionWrite = usePermission('clipboard-write')
 // 为何注释 ? 请看components的readme.md
@@ -16,7 +15,6 @@ const { isSupported, copy } = useClipboard();
 type presetName = string;
 
 const Stage = ref();
-const PixelRect = ref();
 const PixelRectGroup = ref();
 const canvasContainerRef = ref();
 const presetSelector = ref();
@@ -34,9 +32,9 @@ const colorConfig = ref(["#000000", "#ffffff", "#1e80ff", "#f53f3f"]);
 const selectColor = ref(colorConfig.value[0]);
 let basicCellConfig = reactive({
   size: 5, // 单个格子宽高
-  border: 1, // 边框宽度
-  xCount: 12, // 横向有几个
-  yCount: 12, // 纵向有几个
+  border: 0.5, // 边框宽度
+  xCount: 10, // 横向有几个
+  yCount: 10, // 纵向有几个
 });
 
 // 优秀的预设, 包含颜色配置, 尺寸大小
@@ -45,7 +43,7 @@ const awsomePreset = ref([
     name: "基础预设",
     cellConfig: {
       size: 5,
-      border: 1,
+      border: 0.5,
       xCount: 12,
       yCount: 12,
     },
@@ -55,7 +53,7 @@ const awsomePreset = ref([
     name: "IKUN",
     cellConfig: {
       size: 5,
-      border: 1,
+      border: 0.5,
       xCount: 15,
       yCount: 24,
     },
@@ -71,170 +69,93 @@ const awsomePreset = ref([
   },
 ]);
 
-// 初始化画布
-async function initStage() {
-  Stage.value = new AppStage(canvasContainerRef, {
-    isInitTransformer: false,
-    isAllowMouseSelectShapes: false,
-    scale: true,
-  });
-
-  Stage.value.setFillConfig({
-    color: selectColor.value,
-  });
-}
-
-// 生成矩形框+方格子
-function genRectPixelBox() {
-  Stage.value.clearAllBaseShapes();
+// 清空画布
+const resetStage = () => {
   isFillMode.value = false;
-  basicCellConfig.xCount = isNaN(+basicCellConfig.xCount)
-    ? 0
-    : +basicCellConfig.xCount;
-  basicCellConfig.yCount = isNaN(+basicCellConfig.yCount)
-    ? 0
-    : +basicCellConfig.yCount;
-  PixelRectGroup.value = new Konva.Group({
-    x: 500,
-    y: 200,
-    draggable: false,
-  });
-  logger.info(`basicCellConfig => ${JSON.stringify(basicCellConfig, null, 2)}`);
-  // 矩形的x.y是相对于group的
-  PixelRect.value = new Konva.Rect({
-    x: 0,
-    y: 0,
+  mode.value = MouseMode.BASIC;
+  Stage.value.getStage() && Stage.value.getStage().removeAll();
+};
+// 画板, 画板是可交互区域
+const genPixelCanvasFrame = () => {
+  resetStage();
+  let width = Stage.value.getApp().width;
+  let height = Stage.value.getApp().height;
+
+  // 边框算在宽高之内，类似 border-box
+  PixelRectGroup.value = new Frame({
+    x: width / 2,
+    y: height / 2 - 100,
     width: basicCellConfig.xCount * basicCellConfig.size,
     height: basicCellConfig.yCount * basicCellConfig.size,
-    id: "pixel-container",
-    fill: "white",
-    stroke: "black",
-    strokeWidth: 0,
+    // stroke: "#000",
+    // strokeWidth: 0.5,
+    shadow: {
+      x: 0,
+      y: 0,
+      blur: 4,
+      color: "#FF0000AA",
+    },
+    fill: "transparent",
     draggable: false,
   });
-  Stage.value.createShapesByGroup(PixelRectGroup.value, PixelRect.value);
-  // 增加缓存
-  PixelRect.value.cache();
-  Stage.value.setScaleControler(PixelRectGroup.value);
-  Stage.value.setDrawControler(PixelRectGroup.value);
 
-  genPixelBoxCells();
-}
+  genPixelCells();
+};
 
 // 根据配置生成方格子
-function genPixelBoxCells() {
-  const { x, y, strokeWidth: border } = PixelRect.value?.getAttrs();
+const genPixelCells = () => {
   const cells = [];
-  logger.info(`当前数量 => ${basicCellConfig.xCount * basicCellConfig.yCount}`);
-  if (basicCellConfig.xCount * basicCellConfig.yCount > 2000) {
-    toast.value
-      && toast.value.show({
-        type: "error",
-        msg: "数量过多时会有明显卡顿和掉帧, 请调整数量大小",
-      });
-  }
+  //   const { width, height, strokeWidth: border } = PixelRectGroup.value;
   for (let xIndex = 0; xIndex < basicCellConfig.xCount; xIndex++) {
     for (let yIndex = 0; yIndex < basicCellConfig.yCount; yIndex++) {
       const attrs = {
-        x: x + border + basicCellConfig.size * xIndex,
-        y: y + border + basicCellConfig.size * yIndex,
+        x: basicCellConfig.size * xIndex,
+        y: basicCellConfig.size * yIndex,
         width: basicCellConfig.size,
         height: basicCellConfig.size,
-        strokeWidth: basicCellConfig.border,
-        stroke: "black",
         fill: "white",
-        name: `fillnode-${xIndex}-${yIndex}`,
         draggable: false,
       };
-      const rect = new Konva.Rect(attrs);
+      const rect = new Rect(attrs);
+      //   stage.addRect(rect, PixelRectGroup.value);
+
       cells.push(rect);
     }
   }
-  Stage.value.createShapesByGroup(PixelRectGroup.value, cells);
-}
 
-// 清空画布
-function resetCanvas() {
-  Stage.value.clearFilledRects();
-}
-// 导出图片
-function exportImage() {
-  // 缩放回原始大小
-  PixelRectGroup.value.scaleX(1);
-  PixelRectGroup.value.scaleY(1);
-  if (isClearBorder.value) {
-    PixelRectGroup.value
-      .getChildren((node: Konva.Rect) => {
-        return node.getAttr("name").includes("fillnode");
-      })
-      .forEach((rect: Konva.Rect) => {
-        rect.setAttr("strokeWidth", 0);
-        Stage.value.batchDraw();
-      });
-  }
-  nextTick(() => {
-    // 获取位置
-    const { x, y } = PixelRectGroup.value.absolutePosition();
-    const { width, height } = PixelRect.value.getAttrs();
-    const dataURL = Stage.value.toDataURL({
-      x,
-      y,
-      width,
-      height,
-      pixelRatio: window.devicePixelRatio,
-    });
-    downloadPNGForCanvas(dataURL, "测试");
-
-    if (isClearBorder.value) {
-      PixelRectGroup.value
-        .getChildren((node: Konva.Rect) => {
-          return node.getAttr("name").includes("fillnode");
-        })
-        .forEach((rect: Konva.Rect) => {
-          rect.setAttr("strokeWidth", basicCellConfig.border);
-          Stage.value.batchDraw();
-        });
-    }
-  });
-}
+  Stage.value.addRects(cells, PixelRectGroup.value);
+};
 
 // 更改鼠标模式
-function changeMode(e: any) {
+const changeMode = (e: any) => {
   const checked = e.target.checked;
   isFillMode.value = checked;
-  mode.value = checked ? "fill" : "basic";
-  Stage.value.switchMouseMode(mode.value);
-  // 监听填充动作
-  Stage.value.listenAndAssignTask();
-}
+  mode.value = checked ? MouseMode.FILL : MouseMode.BASIC;
+  Stage.value.setMouseMode(mode.value, PixelRectGroup.value);
+};
 
-function setBorderVisibleForExport(e: any) {
-  console.log(`e.target.checked`, e.target.checked);
-  isClearBorder.value = e.target.checked;
-}
 // 更改当前颜色
-function changeColor(color: string) {
+const changeColor = (color: string) => {
   selectColor.value = color;
   // let colors = colorConfig.value.filter(item => item !== color)
   // colorConfig.value = [color, ...colors];
 
-  Stage.value.setFillConfig({
-    color: selectColor.value,
-  });
-}
-function selectPreset(name: presetName) {
+  Stage.value.setFillConfig("color", selectColor.value);
+};
+
+const selectPreset = (name: presetName) => {
   console.log(`name`, name);
   applyAwsomePreset(name);
-}
+};
 
 // 检查preset是否合法
-function checkPreset(preset: any) {
+const checkPreset = (preset: any) => {
   const checkKeys = ["name", "colors", "cellConfig"];
-  if (checkKeys.every(key => preset.hasOwnProperty(key))) {
+  if (checkKeys.every((key) => preset.hasOwnProperty(key))) {
     if (
-      typeof preset.name === "string"
-      && Array.isArray(preset.colors)
-      && preset.cellConfig instanceof Object
+      typeof preset.name === "string" &&
+      Array.isArray(preset.colors) &&
+      preset.cellConfig instanceof Object
     ) {
       return true;
     }
@@ -245,10 +166,11 @@ function checkPreset(preset: any) {
     type: "error",
   });
   return false;
-}
-function applyAwsomePreset(name: presetName) {
+};
+
+const applyAwsomePreset = (name: presetName) => {
   logger.info(`切换预设 =>${name}`);
-  const preset = awsomePreset.value.find(item => item.name === name);
+  const preset = awsomePreset.value.find((item) => item.name === name);
   if (preset) {
     copyPreset.value = JSON.stringify(preset, null, 2);
     const { cellConfig, colors } = preset;
@@ -263,9 +185,9 @@ function applyAwsomePreset(name: presetName) {
       type: "error",
     });
   }
-}
+};
 
-function exportPreset() {
+const exportPreset = () => {
   if (isSupported) {
     copy(copyPreset.value);
     toast.value.show({
@@ -273,19 +195,21 @@ function exportPreset() {
       msg: "已复制到剪切板!",
     });
   }
-}
-function filterNoRepeatPresets(presets: any[]) {
+};
+
+const filterNoRepeatPresets = (presets: any[]) => {
   const newPresets: any[] = [];
   presets.forEach((item: any) => {
     // 如果不存在, push
-    if (newPresets.findIndex(preset => preset.name === item.name) === -1) {
+    if (newPresets.findIndex((preset) => preset.name === item.name) === -1) {
       newPresets.push(item);
     }
   });
   return newPresets;
-}
+};
+
 // 加载本地配置
-function loadLocalPreset() {
+const loadLocalPreset = () => {
   const localPresets = localStorage.getItem("ZZSTUDIO_PPP_PRESETS");
   if (localPresets) {
     try {
@@ -294,7 +218,7 @@ function loadLocalPreset() {
       if (presets.every((preset: any) => checkPreset(preset))) {
         // 去重, name一样会被去掉, 本地优先
         const newPresets = filterNoRepeatPresets(
-          presets.concat(awsomePreset.value),
+          presets.concat(awsomePreset.value)
         );
         awsomePreset.value = newPresets.concat();
       }
@@ -308,7 +232,7 @@ function loadLocalPreset() {
   } else {
     logger.info("无本地预设");
   }
-}
+};
 
 // 监听 -> 应用 -> 存本地
 watch(pastePreset, (json) => {
@@ -318,13 +242,13 @@ watch(pastePreset, (json) => {
     if (checkPreset(preset)) {
       // 去重
       const newPresets = filterNoRepeatPresets(
-        awsomePreset.value.concat(preset),
+        awsomePreset.value.concat(preset)
       );
       awsomePreset.value = newPresets.concat();
       // 存本地
       localStorage.setItem(
         "ZZSTUDIO_PPP_PRESETS",
-        JSON.stringify(awsomePreset.value),
+        JSON.stringify(awsomePreset.value)
       );
       // 选中
       selectPreset(preset.name);
@@ -344,31 +268,50 @@ watch(pastePreset, (json) => {
 });
 
 // 绑定键盘事件
-function bindKeyboardEvent() {
+const bindKeyboardEvent = () => {
   window.addEventListener("keydown", (e) => {
-    if (e.code === "Space") {
+    if (e.code === "Backquote") {
       let index = colorConfig.value.findIndex(
-        color => color === selectColor.value,
+        (color) => color === selectColor.value
       );
       index = index >= colorConfig.value.length - 1 ? 0 : index + 1;
       changeColor(colorConfig.value[index]);
     }
   });
-}
+};
 
+const initByLeafer = () => {
+  Stage.value = new LeaferController(canvasContainerRef);
+};
+
+const exportImage2 = () => {
+  const { x, y, width, height } = PixelRectGroup.value;
+  const canvas: Canvas = new Canvas({
+    x,
+    y,
+    width,
+    height,
+  });
+  // 只画, 不在页面呈现
+  canvas.draw(PixelRectGroup.value);
+  downloadPNGForCanvas(canvas.canvas.toDataURL() as string, "test.png");
+  canvas.destroy();
+};
 onMounted(() => {
-  initStage();
+  initByLeafer();
+  genPixelCanvasFrame();
+  //   initStage();
   bindKeyboardEvent();
-  genRectPixelBox();
+  //   genRectPixelBox();
   loadLocalPreset();
 });
 </script>
 
 <template>
-  <div ref="canvasContainerRef" class="flex-1" />
+  <div ref="canvasContainerRef" id="canvasContainerRef" class="flex-1" />
 
   <div class="fixed right-[30px] top-[130px] z-999 max-w-40 flex flex-col">
-    <button class="mb-2 btn btn-primary btn-md" @click="genRectPixelBox">
+    <button class="mb-2 btn btn-primary btn-md" @click="genPixelCanvasFrame">
       生成!(会清空)
     </button>
     <Select
@@ -378,22 +321,24 @@ onMounted(() => {
       @change="selectPreset"
     />
     <div class="mouse-mode mt-2 flex items-center justify-center">
-      <span :class="[!isFillMode ? 'font-500 text-xl' : '']">标准</span><input
+      <span :class="[!isFillMode ? 'font-500 text-xl' : '']">标准</span
+      ><input
         type="checkbox"
         class="toggle"
         :checked="isFillMode"
         @change="changeMode"
-      >
+      />
       <span :class="[isFillMode ? 'font-500 text-xl' : '']">填充</span>
     </div>
-    <div class="setting mt-2">
-      <span class="text-sm font-500">导出去边框</span><input
+    <!-- <div class="setting mt-2">
+      <span class="text-sm font-500">导出去边框</span
+      ><input
         type="checkbox"
         class="toggle"
         :checked="isClearBorder"
         @change="setBorderVisibleForExport"
-      >
-    </div>
+      />
+    </div> -->
     <div
       class="color-picker mt-2 min-h-18 flex flex-wrap items-end border border-primary border-dashed p-1"
     >
@@ -411,14 +356,14 @@ onMounted(() => {
         type="text"
         placeholder="横"
         class="mr-2 max-w-xs w-12 text-4 text-primary font-bold input input-sm"
-      >
+      />
       <span> X </span>
       <input
         v-model="basicCellConfig.yCount"
         type="text"
         placeholder="纵"
         class="ml-2 max-w-xs w-12 text-4 text-primary font-bold input input-sm"
-      >
+      />
     </div>
     <div class="relative">
       <textarea
@@ -457,10 +402,10 @@ onMounted(() => {
       </div>
     </div>
 
-    <button class="mb-2 mt-2 btn btn-primary" @click="exportImage">
+    <button class="mb-2 mt-2 btn btn-primary" @click="exportImage2">
       导出图片
     </button>
-    <button class="btn btn-secondary" @click="resetCanvas">
+    <button class="btn btn-secondary" @click="genPixelCanvasFrame">
       清空颜色
     </button>
   </div>
