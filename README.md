@@ -66,6 +66,11 @@ docker run --rm -it -p 8080:80 viteboot:latest
 ```
 
 ## 版本更新
+
+### v0.8.1
+- 从此版本开始，核心插件从 Konva 切换到了 Leafer，分支切换到了 Leafer（不日将变更为 master）
+- 此分支不再更新！
+
 ### v0.8.0
 - Toast组件可以被重复使用
 - 增加了一个Select组件
