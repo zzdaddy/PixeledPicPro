@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import ThemeChange from "./components/ThemeChange/index.vue";
+// import ThemeChange from "./components/ThemeChange/index.vue";
 
 // import LocalesChange from "./components/LocalesChange/index.vue";
 import UnoCSSIconButton from "~/components/Icon/UnoCSSIconButton.vue";
@@ -36,7 +36,7 @@ const version = ref({ __APP_VERSION__ });
               >P<span class="lowercase">ro</span></span
             >
             <sup
-              ><em class="text-xs">{{ version.__APP_VERSION__ }}</em></sup
+              ><em class="text-xs">Beta v{{ version.__APP_VERSION__ }}</em></sup
             >
           </div>
         </RouterLink>
