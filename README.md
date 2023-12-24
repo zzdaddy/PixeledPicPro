@@ -104,3 +104,8 @@ docker run --rm -it -p 8080:80 viteboot:latest
 
 ### V0.6.0
 实现了基本功能
+
+
+## LICENSE
+
+[MIT](./LICENSE)
