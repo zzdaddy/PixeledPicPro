@@ -26,17 +26,27 @@ const version = ref({ __APP_VERSION__ });
           <div
             class="inline-flex text-lg text-primary transition-all duration-200 md:text-3xl"
           >
-            <span class="text-primary">P<span class="lowercase">ixeled</span></span>
-            <span class="text-accent-content">P<span class="lowercase">ic</span></span>
-            <span class="text-accent-content">P<span class="lowercase">ro</span></span>
-            <sup><em class="text-xs">{{ version.__APP_VERSION__ }}</em></sup>
+            <span class="text-primary"
+              >P<span class="lowercase">ixeled</span></span
+            >
+            <span class="text-accent-content"
+              >P<span class="lowercase">ic</span></span
+            >
+            <span class="text-accent-content"
+              >P<span class="lowercase">ro</span></span
+            >
+            <sup
+              ><em class="text-xs">{{ version.__APP_VERSION__ }}</em></sup
+            >
           </div>
         </RouterLink>
       </div>
       <div>
-        <ThemeChange />
+        <!-- <ThemeChange /> -->
         <!-- <LocalesChange /> -->
-        <span id="busuanzi_container_site_pv">总访问量:<span id="busuanzi_value_site_pv" />人</span>
+        <span id="busuanzi_container_site_pv"
+          >总访问量:<span id="busuanzi_value_site_pv" />人</span
+        >
 
         <span
           class="tooltip tooltip-bottom before:text-xs before:content-[attr(data-tip)]"

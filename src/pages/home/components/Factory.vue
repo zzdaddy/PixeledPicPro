@@ -13,9 +13,14 @@ import { LeaferController, MouseMode } from "./LeaferController";
 const { isSupported, copy } = useClipboard();
 
 type presetName = string;
-
+enum Direction {
+  TOP = "top",
+  BOTTOM = "bottom",
+  LEFT = "left",
+  RIGHT = "right",
+}
 const Stage = ref();
-const PixelRectGroup = ref();
+const PixelRectFrame = ref();
 const canvasContainerRef = ref();
 const presetSelector = ref();
 const toast = ref();
@@ -31,11 +36,22 @@ const mode = ref("basic");
 const colorConfig = ref(["#000000", "#ffffff", "#1e80ff", "#f53f3f"]);
 const selectColor = ref(colorConfig.value[0]);
 let basicCellConfig = reactive({
-  size: 5, // 单个格子宽高
-  border: 0.5, // 边框宽度
-  xCount: 10, // 横向有几个
-  yCount: 10, // 纵向有几个
+  size: 0, // 单个格子宽高
+  border: 0, // 边框宽度
+  xCount: 0, // 横向有几个
+  yCount: 0, // 纵向有几个
 });
+
+const basePreset = {
+  name: "基础预设",
+  cellConfig: {
+    size: 5,
+    border: 0.5,
+    xCount: 12,
+    yCount: 12,
+  },
+  colors: ["#000000", "#ffffff", "#1e80ff", "#f53f3f"],
+};
 
 // 优秀的预设, 包含颜色配置, 尺寸大小
 const awsomePreset = ref([
@@ -75,25 +91,30 @@ const resetStage = () => {
   mode.value = MouseMode.BASIC;
   Stage.value.getStage() && Stage.value.getStage().removeAll();
 };
+
+const resetAndRebuildStage = () => {
+  resetStage();
+  genPixelCanvasFrame();
+};
 // 画板, 画板是可交互区域
 const genPixelCanvasFrame = () => {
-  resetStage();
   let width = Stage.value.getApp().width;
   let height = Stage.value.getApp().height;
 
   // 边框算在宽高之内，类似 border-box
-  PixelRectGroup.value = new Frame({
+  PixelRectFrame.value = new Frame({
     x: width / 2,
     y: height / 2 - 100,
     width: basicCellConfig.xCount * basicCellConfig.size,
     height: basicCellConfig.yCount * basicCellConfig.size,
+    overflow: "show",
     // stroke: "#000",
     // strokeWidth: 0.5,
     shadow: {
       x: 0,
       y: 0,
       blur: 4,
-      color: "#FF0000AA",
+      color: "#570DF8",
     },
     fill: "transparent",
     draggable: false,
@@ -105,7 +126,7 @@ const genPixelCanvasFrame = () => {
 // 根据配置生成方格子
 const genPixelCells = () => {
   const cells = [];
-  //   const { width, height, strokeWidth: border } = PixelRectGroup.value;
+  //   const { width, height, strokeWidth: border } = PixelRectFrame.value;
   for (let xIndex = 0; xIndex < basicCellConfig.xCount; xIndex++) {
     for (let yIndex = 0; yIndex < basicCellConfig.yCount; yIndex++) {
       const attrs = {
@@ -117,13 +138,122 @@ const genPixelCells = () => {
         draggable: false,
       };
       const rect = new Rect(attrs);
-      //   stage.addRect(rect, PixelRectGroup.value);
+      //   stage.addRect(rect, PixelRectFrame.value);
 
       cells.push(rect);
     }
   }
 
-  Stage.value.addRects(cells, PixelRectGroup.value);
+  Stage.value.addRects(cells, PixelRectFrame.value);
+};
+
+const getDynamicRectPostion = (
+  direction: Direction,
+  xIndex: number,
+  yIndex: number
+): { x: number; y: number } => {
+  if (direction === Direction.TOP) {
+    return {
+      x: basicCellConfig.size * xIndex,
+      y: -(basicCellConfig.size * (yIndex + 1)),
+    };
+  }
+  if (direction === Direction.BOTTOM) {
+    return {
+      x: basicCellConfig.size * xIndex,
+      y: basicCellConfig.size * (basicCellConfig.yCount + yIndex),
+    };
+  }
+
+  if (direction === Direction.LEFT) {
+    return {
+      x: -(basicCellConfig.size * (xIndex + 1)),
+      y: basicCellConfig.size * yIndex,
+    };
+  }
+
+  if (direction === Direction.RIGHT) {
+    return {
+      x: basicCellConfig.size * (basicCellConfig.xCount + xIndex),
+      y: basicCellConfig.size * yIndex,
+    };
+  }
+  return {
+    x: 0,
+    y: 0,
+  };
+};
+
+// 添加动态的 rect
+const setDynamicRects = (direction: Direction, count: number = 1) => {
+  let rects = [];
+  let isYAxisUpdate =
+    direction === Direction.TOP || direction === Direction.BOTTOM;
+  let oneStripCellCount = isYAxisUpdate
+    ? basicCellConfig.xCount
+    : basicCellConfig.yCount;
+  console.log(`oneStripCellCount`, oneStripCellCount);
+  for (let i = 0; i < count; i++) {
+    for (let j = 0; j < oneStripCellCount; j++) {
+      let { x, y } = getDynamicRectPostion(
+        direction,
+        isYAxisUpdate ? j : i,
+        isYAxisUpdate ? i : j
+      );
+      let attrs = {
+        x,
+        y,
+        width: basicCellConfig.size,
+        height: basicCellConfig.size,
+        fill: "white",
+        draggable: false,
+      };
+      const rect = new Rect(attrs);
+      rects.push(rect);
+    }
+  }
+
+  Stage.value.addRects(rects, PixelRectFrame.value);
+};
+// 动态更新矩形块数量
+// const dynamicUpdateRectTable = (direction: Direction, count: number = 1) => {
+//   setDynamicRects(direction, count);
+// };
+// 增加宽高时，默认坐标轴方向增加
+// 传入增加的方向和数量
+// 容器内的矩形块，始终在左上角
+const updatePixelAreaSize = (direction: Direction, count: number = 1) => {
+  switch (direction) {
+    case Direction.TOP:
+      PixelRectFrame.value.height += basicCellConfig.size * count;
+      setDynamicRects(direction, count);
+      // 子元素往下挪一个
+      PixelRectFrame.value.children.forEach((rect: Rect) => {
+        rect.y += basicCellConfig.size * count;
+      });
+      basicCellConfig.yCount += count;
+      break;
+    case Direction.BOTTOM:
+      // 容器高度++
+      PixelRectFrame.value.height += basicCellConfig.size * count;
+      setDynamicRects(direction, count);
+      basicCellConfig.yCount += count;
+      // 子元素不必挪， 因为增加容器高度默认就是往下加
+      break;
+    case Direction.LEFT: // 容器高度++
+      PixelRectFrame.value.width += basicCellConfig.size * count;
+      setDynamicRects(direction, count);
+      // 子元素往下挪一个
+      PixelRectFrame.value.children.forEach((rect: Rect) => {
+        rect.x += basicCellConfig.size * count;
+      });
+      basicCellConfig.xCount += count;
+      break;
+    case Direction.RIGHT:
+      PixelRectFrame.value.width += basicCellConfig.size * count;
+      setDynamicRects(direction, count);
+      basicCellConfig.xCount += count;
+  }
 };
 
 // 更改鼠标模式
@@ -131,7 +261,7 @@ const changeMode = (e: any) => {
   const checked = e.target.checked;
   isFillMode.value = checked;
   mode.value = checked ? MouseMode.FILL : MouseMode.BASIC;
-  Stage.value.setMouseMode(mode.value, PixelRectGroup.value);
+  Stage.value.setMouseMode(mode.value, PixelRectFrame.value);
 };
 
 // 更改当前颜色
@@ -208,7 +338,7 @@ const filterNoRepeatPresets = (presets: any[]) => {
   return newPresets;
 };
 
-// 加载本地配置
+// 加载本地配置 并加载基础预设
 const loadLocalPreset = () => {
   const localPresets = localStorage.getItem("ZZSTUDIO_PPP_PRESETS");
   if (localPresets) {
@@ -221,16 +351,19 @@ const loadLocalPreset = () => {
           presets.concat(awsomePreset.value)
         );
         awsomePreset.value = newPresets.concat();
+        applyAwsomePreset("基础预设");
       }
     } catch (err) {
       toast.value.show({
         msg: "本地预设加载失败",
         type: "error",
       });
+      applyAwsomePreset("基础预设");
       return false;
     }
   } else {
     logger.info("无本地预设");
+    applyAwsomePreset("基础预设");
   }
 };
 
@@ -285,7 +418,7 @@ const initByLeafer = () => {
 };
 
 const exportImage2 = () => {
-  const { x, y, width, height } = PixelRectGroup.value;
+  const { x, y, width, height } = PixelRectFrame.value;
   const canvas: Canvas = new Canvas({
     x,
     y,
@@ -293,17 +426,15 @@ const exportImage2 = () => {
     height,
   });
   // 只画, 不在页面呈现
-  canvas.draw(PixelRectGroup.value);
+  canvas.draw(PixelRectFrame.value);
   downloadPNGForCanvas(canvas.canvas.toDataURL() as string, "test.png");
   canvas.destroy();
 };
 onMounted(() => {
   initByLeafer();
-  genPixelCanvasFrame();
-  //   initStage();
   bindKeyboardEvent();
-  //   genRectPixelBox();
   loadLocalPreset();
+  genPixelCanvasFrame();
 });
 </script>
 
@@ -311,7 +442,7 @@ onMounted(() => {
   <div ref="canvasContainerRef" id="canvasContainerRef" class="flex-1" />
 
   <div class="fixed right-[30px] top-[130px] z-999 max-w-40 flex flex-col">
-    <button class="mb-2 btn btn-primary btn-md" @click="genPixelCanvasFrame">
+    <button class="mb-2 btn btn-primary btn-md" @click="resetAndRebuildStage">
       生成!(会清空)
     </button>
     <Select
@@ -405,8 +536,32 @@ onMounted(() => {
     <button class="mb-2 mt-2 btn btn-primary" @click="exportImage2">
       导出图片
     </button>
-    <button class="btn btn-secondary" @click="genPixelCanvasFrame">
+    <button class="btn btn-secondary" @click="resetAndRebuildStage">
       清空颜色
+    </button>
+    <button
+      class="btn btn-secondary"
+      @click="updatePixelAreaSize(Direction.TOP)"
+    >
+      TOP++
+    </button>
+    <button
+      class="btn btn-secondary"
+      @click="updatePixelAreaSize(Direction.BOTTOM)"
+    >
+      Bottom++
+    </button>
+    <button
+      class="btn btn-secondary"
+      @click="updatePixelAreaSize(Direction.LEFT)"
+    >
+      left++
+    </button>
+    <button
+      class="btn btn-secondary"
+      @click="updatePixelAreaSize(Direction.RIGHT)"
+    >
+      right++
     </button>
   </div>
 

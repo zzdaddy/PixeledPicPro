@@ -11,7 +11,7 @@ function testStore() {
 <template>
   <div class="mt-[-4rem] min-h-screen text-primary-content hero">
     <!--  <div class="hero min-h-screen from-primary to-secondary" style="background-image: url(https://img.js.design/assets/Resources/background/home-bg-2.png);"> -->
-    <div class="place-items-center hero-overlay" />
+    <div class="place-items-center" />
     <div class="text-center hero-content">
       <div class="max-w-md">
         <h1 class="mb-5 text-5xl font-bold">此处应该有一个动图</h1>
