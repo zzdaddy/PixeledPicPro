@@ -25,7 +25,7 @@
 - 预设功能
   - 包含一组颜色和一个行列设置
 
-### 功能预览(最初版)
+### 功能预览(不一定是最新的，我可能懒得录 GIF)
 [在线体验最新版](https://zzstudio.cn/stall/pixeled-pic-pro/#/home)
 
 <img src='README.assets/yanshi.gif' alt='pixeled pic pro'/>
