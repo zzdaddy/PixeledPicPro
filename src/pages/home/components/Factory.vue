@@ -30,28 +30,24 @@ const pastePreset = ref<string>("");
 const showPasteTextarea = ref<boolean>(true);
 // 是否是填充模式
 const isFillMode = ref<boolean>(false);
-// 导出时去除边框
-const isClearBorder = ref<boolean>(false);
+// 是否已经动态变更
+
 const mode = ref("basic");
 const colorConfig = ref(["#000000", "#ffffff", "#1e80ff", "#f53f3f"]);
 const selectColor = ref(colorConfig.value[0]);
-let basicCellConfig = reactive({
-  size: 0, // 单个格子宽高
-  border: 0, // 边框宽度
-  xCount: 0, // 横向有几个
-  yCount: 0, // 纵向有几个
-});
+const baseRectSize = ref<number>(5);
+const shapeTableRow = ref<number>(12); // xcount
+const shapeTableCol = ref<number>(12); // ycount
 
-const basePreset = {
-  name: "基础预设",
-  cellConfig: {
-    size: 5,
-    border: 0.5,
-    xCount: 12,
-    yCount: 12,
-  },
-  colors: ["#000000", "#ffffff", "#1e80ff", "#f53f3f"],
-};
+// 是否已动态更新行和列
+const isDynamicUpdate = computed(() => {
+  let presetName = presetSelector?.value?.getValue() || "基础预设";
+  let preset = awsomePreset.value.find((item) => item.name === presetName);
+  return (
+    shapeTableRow.value != preset?.cellConfig.yCount ||
+    shapeTableCol.value != preset?.cellConfig.xCount
+  );
+});
 
 // 优秀的预设, 包含颜色配置, 尺寸大小
 const awsomePreset = ref([
@@ -105,9 +101,9 @@ const genPixelCanvasFrame = () => {
   PixelRectFrame.value = new Frame({
     x: width / 2,
     y: height / 2 - 100,
-    width: basicCellConfig.xCount * basicCellConfig.size,
-    height: basicCellConfig.yCount * basicCellConfig.size,
-    overflow: "show",
+    width: shapeTableRow.value * baseRectSize.value,
+    height: shapeTableCol.value * baseRectSize.value,
+    overflow: "hide",
     // stroke: "#000",
     // strokeWidth: 0.5,
     shadow: {
@@ -127,13 +123,13 @@ const genPixelCanvasFrame = () => {
 const genPixelCells = () => {
   const cells = [];
   //   const { width, height, strokeWidth: border } = PixelRectFrame.value;
-  for (let xIndex = 0; xIndex < basicCellConfig.xCount; xIndex++) {
-    for (let yIndex = 0; yIndex < basicCellConfig.yCount; yIndex++) {
+  for (let xIndex = 0; xIndex < shapeTableRow.value; xIndex++) {
+    for (let yIndex = 0; yIndex < shapeTableCol.value; yIndex++) {
       const attrs = {
-        x: basicCellConfig.size * xIndex,
-        y: basicCellConfig.size * yIndex,
-        width: basicCellConfig.size,
-        height: basicCellConfig.size,
+        x: baseRectSize.value * xIndex,
+        y: baseRectSize.value * yIndex,
+        width: baseRectSize.value,
+        height: baseRectSize.value,
         fill: "white",
         draggable: false,
       };
@@ -154,28 +150,28 @@ const getDynamicRectPostion = (
 ): { x: number; y: number } => {
   if (direction === Direction.TOP) {
     return {
-      x: basicCellConfig.size * xIndex,
-      y: -(basicCellConfig.size * (yIndex + 1)),
+      x: baseRectSize.value * xIndex,
+      y: -(baseRectSize.value * (yIndex + 1)),
     };
   }
   if (direction === Direction.BOTTOM) {
     return {
-      x: basicCellConfig.size * xIndex,
-      y: basicCellConfig.size * (basicCellConfig.yCount + yIndex),
+      x: baseRectSize.value * xIndex,
+      y: baseRectSize.value * (shapeTableCol.value + yIndex),
     };
   }
 
   if (direction === Direction.LEFT) {
     return {
-      x: -(basicCellConfig.size * (xIndex + 1)),
-      y: basicCellConfig.size * yIndex,
+      x: -(baseRectSize.value * (xIndex + 1)),
+      y: baseRectSize.value * yIndex,
     };
   }
 
   if (direction === Direction.RIGHT) {
     return {
-      x: basicCellConfig.size * (basicCellConfig.xCount + xIndex),
-      y: basicCellConfig.size * yIndex,
+      x: baseRectSize.value * (shapeTableRow.value + xIndex),
+      y: baseRectSize.value * yIndex,
     };
   }
   return {
@@ -190,9 +186,8 @@ const setDynamicRects = (direction: Direction, count: number = 1) => {
   let isYAxisUpdate =
     direction === Direction.TOP || direction === Direction.BOTTOM;
   let oneStripCellCount = isYAxisUpdate
-    ? basicCellConfig.xCount
-    : basicCellConfig.yCount;
-  console.log(`oneStripCellCount`, oneStripCellCount);
+    ? shapeTableRow.value
+    : shapeTableCol.value;
   for (let i = 0; i < count; i++) {
     for (let j = 0; j < oneStripCellCount; j++) {
       let { x, y } = getDynamicRectPostion(
@@ -203,8 +198,8 @@ const setDynamicRects = (direction: Direction, count: number = 1) => {
       let attrs = {
         x,
         y,
-        width: basicCellConfig.size,
-        height: basicCellConfig.size,
+        width: baseRectSize.value,
+        height: baseRectSize.value,
         fill: "white",
         draggable: false,
       };
@@ -225,35 +220,36 @@ const setDynamicRects = (direction: Direction, count: number = 1) => {
 const updatePixelAreaSize = (direction: Direction, count: number = 1) => {
   switch (direction) {
     case Direction.TOP:
-      PixelRectFrame.value.height += basicCellConfig.size * count;
+      PixelRectFrame.value.height += baseRectSize.value * count;
       setDynamicRects(direction, count);
       // 子元素往下挪一个
       PixelRectFrame.value.children.forEach((rect: Rect) => {
-        rect.y += basicCellConfig.size * count;
+        rect.y += baseRectSize.value * count;
       });
-      basicCellConfig.yCount += count;
+      shapeTableCol.value += count;
       break;
     case Direction.BOTTOM:
       // 容器高度++
-      PixelRectFrame.value.height += basicCellConfig.size * count;
+      PixelRectFrame.value.height += baseRectSize.value * count;
       setDynamicRects(direction, count);
-      basicCellConfig.yCount += count;
+      shapeTableCol.value += count;
       // 子元素不必挪， 因为增加容器高度默认就是往下加
       break;
     case Direction.LEFT: // 容器高度++
-      PixelRectFrame.value.width += basicCellConfig.size * count;
+      PixelRectFrame.value.width += baseRectSize.value * count;
       setDynamicRects(direction, count);
       // 子元素往下挪一个
       PixelRectFrame.value.children.forEach((rect: Rect) => {
-        rect.x += basicCellConfig.size * count;
+        rect.x += baseRectSize.value * count;
       });
-      basicCellConfig.xCount += count;
+      shapeTableRow.value += count;
       break;
     case Direction.RIGHT:
-      PixelRectFrame.value.width += basicCellConfig.size * count;
+      PixelRectFrame.value.width += baseRectSize.value * count;
       setDynamicRects(direction, count);
-      basicCellConfig.xCount += count;
+      shapeTableRow.value += count;
   }
+  PixelRectFrame.value.forceUpdate();
 };
 
 // 更改鼠标模式
@@ -304,9 +300,12 @@ const applyAwsomePreset = (name: presetName) => {
   if (preset) {
     copyPreset.value = JSON.stringify(preset, null, 2);
     const { cellConfig, colors } = preset;
-    const newConfig = Object.assign({}, basicCellConfig, cellConfig);
-    basicCellConfig = newConfig;
+    // 设置当前配置
+    baseRectSize.value = cellConfig.size;
+    shapeTableCol.value = cellConfig.yCount;
+    shapeTableRow.value = cellConfig.xCount;
     colorConfig.value = colors;
+    resetAndRebuildStage();
     // 根据预设生成
     // genRectPixelBox()
   } else {
@@ -367,6 +366,35 @@ const loadLocalPreset = () => {
   }
 };
 
+// 存本地
+const saveLocalPreset = (newPresets: any[]) => {
+  awsomePreset.value = newPresets.concat();
+  // 存本地
+  localStorage.setItem(
+    "ZZSTUDIO_PPP_PRESETS",
+    JSON.stringify(awsomePreset.value)
+  );
+};
+
+// 把当前动态属性更新到预设上
+const upodatePresetFromDynamicAttr = () => {
+  let presetName = presetSelector?.value?.getValue() || "基础预设";
+  let index = awsomePreset.value.findIndex((item) => item.name === presetName);
+  if (index !== -1) {
+    let config = awsomePreset.value[index].cellConfig;
+    awsomePreset.value[index].cellConfig = {
+      ...config,
+      yCount: shapeTableCol.value,
+      xCount: shapeTableRow.value,
+    };
+
+    saveLocalPreset(awsomePreset.value);
+    toast.value.show({
+      type: "success",
+      msg: "预设已更新到本地!",
+    });
+  }
+};
 // 监听 -> 应用 -> 存本地
 watch(pastePreset, (json) => {
   try {
@@ -377,12 +405,7 @@ watch(pastePreset, (json) => {
       const newPresets = filterNoRepeatPresets(
         awsomePreset.value.concat(preset)
       );
-      awsomePreset.value = newPresets.concat();
-      // 存本地
-      localStorage.setItem(
-        "ZZSTUDIO_PPP_PRESETS",
-        JSON.stringify(awsomePreset.value)
-      );
+      saveLocalPreset(newPresets);
       // 选中
       selectPreset(preset.name);
       presetSelector.value.setValue(preset.name);
@@ -483,17 +506,17 @@ onMounted(() => {
     </div>
     <div class="countxy mt-2 flex items-center justify-center">
       <input
-        v-model="basicCellConfig.xCount"
-        type="text"
+        v-model="shapeTableRow"
+        type="number"
         placeholder="横"
-        class="mr-2 max-w-xs w-12 text-4 text-primary font-bold input input-sm"
+        class="mr-2 max-w-xs w-16 text-4 text-primary font-bold input input-sm"
       />
       <span> X </span>
       <input
-        v-model="basicCellConfig.yCount"
-        type="text"
+        v-model="shapeTableCol"
+        type="number"
         placeholder="纵"
-        class="ml-2 max-w-xs w-12 text-4 text-primary font-bold input input-sm"
+        class="ml-2 max-w-xs w-16 text-4 text-primary font-bold input input-sm"
       />
     </div>
     <div class="relative">
@@ -562,6 +585,14 @@ onMounted(() => {
       @click="updatePixelAreaSize(Direction.RIGHT)"
     >
       right++
+    </button>
+
+    <button
+      v-if="isDynamicUpdate"
+      class="btn btn-secondary"
+      @click="upodatePresetFromDynamicAttr"
+    >
+      保存预设
     </button>
   </div>
 

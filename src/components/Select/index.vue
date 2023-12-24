@@ -23,6 +23,9 @@ function setValue(value) {
   curValue.value = value;
 }
 
+function getValue() {
+  return curValue.value;
+}
 onMounted(() => {
   console.log(`options`, props.options[0]);
   curValue.value = props.options[0]?.name;
@@ -30,6 +33,7 @@ onMounted(() => {
 
 defineExpose({
   setValue,
+  getValue,
 });
 </script>
 
@@ -37,12 +41,15 @@ defineExpose({
   <div class="text-primary font-bold">
     {{ title }}
   </div>
-  <select v-model="curValue" class="max-w-xs w-full select select-primary" @change="changeOption">
+  <select
+    v-model="curValue"
+    class="max-w-xs w-full select select-primary"
+    @change="changeOption"
+  >
     <option v-for="option in options">
       {{ option.name }}
     </option>
   </select>
 </template>
 
-<style lang="less" scoped>
-</style>
+<style lang="less" scoped></style>
