@@ -5,18 +5,11 @@
   "private": true,
   "packageManager": "pnpm@8.11.0",
   "description": "a funny pixeled picture process website",
-  "keywords": [
-    "BootVue",
-    "boot-vue",
-    "vite",
-    "unocss",
-    "fast",
-    "boot"
-  ],
+  "keywords": [],
   "main": "src/main.ts",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "vite --mode development",
+    "build": "vite build --mode production",
     "version:patch": "npm version patch",
     "version:minor": "npm version minor",
     "version:major": "npm version major",

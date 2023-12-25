@@ -12,7 +12,7 @@ import VueDevTools from "vite-plugin-vue-devtools";
 // vite.config.ts
 import VueI18nPlugin from "@intlify/unplugin-vue-i18n/vite";
 import UnoCss from "unocss/vite";
-
+// const isDev = process.env.NODE_ENV === "development";
 // import packageJson from './package.json';
 const packageJson = require("./package.json");
 
@@ -137,5 +137,9 @@ export default defineConfig({
   // https://github.com/vitest-dev/vitest
   test: {
     environment: "jsdom",
+  },
+  // 不开 sourcemap 也能调试
+  build: {
+    sourcemap: false,
   },
 });

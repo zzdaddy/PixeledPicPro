@@ -13,13 +13,13 @@ const emit = defineEmits(["change"]);
 
 const curValue = ref("");
 
-function changeOption(e) {
+function changeOption(e: any) {
   const name = e.target.value;
   curValue.value = name;
   emit("change", name);
 }
 
-function setValue(value) {
+function setValue(value: string) {
   curValue.value = value;
 }
 
@@ -28,7 +28,7 @@ function getValue() {
 }
 onMounted(() => {
   console.log(`options`, props.options[0]);
-  curValue.value = props.options[0]?.name;
+  curValue.value = (props.options[0] as { name: string })?.name;
 });
 
 defineExpose({
@@ -47,7 +47,7 @@ defineExpose({
     @change="changeOption"
   >
     <option v-for="option in options">
-      {{ option.name }}
+      {{ (option as any).name }}
     </option>
   </select>
 </template>

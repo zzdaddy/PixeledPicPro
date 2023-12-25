@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import { nextTick, onMounted, reactive, ref } from "vue";
+import { onMounted, ref } from "vue";
 import { useClipboard } from "@vueuse/core";
 import { logger } from "@kirklin/logger";
 import { downloadPNGForCanvas } from "~/utils/canvas";
-import { Rect, Canvas, UI, Frame, Box, PointerEvent } from "leafer-ui";
+import { Rect, Canvas, Frame } from "leafer-ui";
 import { LeaferController, MouseMode } from "./LeaferController";
 // const permissionRead = usePermission('clipboard-read')
 // const permissionWrite = usePermission('clipboard-write')
