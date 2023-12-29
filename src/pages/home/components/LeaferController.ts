@@ -102,6 +102,10 @@ export class LeaferController {
     return this.app.ground;
   }
 
+  // TODO 像素图解析使用
+  // 在背景层插入图片
+  importImageInGround() {}
+
   // container 类型
   // fill模式下只支持容器事件
   setMouseMode(mode: MouseMode, container: StageContainer) {

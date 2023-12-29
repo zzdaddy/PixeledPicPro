@@ -2,14 +2,18 @@
 import { onMounted, ref } from "vue";
 import { useClipboard } from "@vueuse/core";
 import { logger } from "@kirklin/logger";
-import { downloadPNGForCanvas } from "~/utils/canvas";
+import { downloadPNGForCanvas, getPixelColor } from "~/utils/canvas";
 import { Rect, Canvas, Frame } from "leafer-ui";
 import { LeaferController, MouseMode } from "./LeaferController";
 // const permissionRead = usePermission('clipboard-read')
 // const permissionWrite = usePermission('clipboard-write')
 // 为何注释 ? 请看components的readme.md
 // import Toast from '~/components/Toast/index.vue';
-
+declare module "leafer-ui" {
+  interface Rect {
+    rectName?: string;
+  }
+}
 const { isSupported, copy } = useClipboard();
 
 type presetName = string;
@@ -23,7 +27,9 @@ const Stage = ref();
 const PixelRectFrame = ref();
 const canvasContainerRef = ref();
 const presetSelector = ref();
+const fileInput = ref();
 const toast = ref();
+const GroundCanvas = ref(); // 背景的canvas图, 用来获取元素
 
 const copyPreset = ref<string>("");
 const pastePreset = ref<string>("");
@@ -35,9 +41,13 @@ const isFillMode = ref<boolean>(false);
 const mode = ref("basic");
 const colorConfig = ref(["#000000", "#ffffff", "#1e80ff", "#f53f3f"]);
 const selectColor = ref(colorConfig.value[0]);
-const baseRectSize = ref<number>(5);
-const shapeTableRow = ref<number>(12); // xcount
-const shapeTableCol = ref<number>(12); // ycount
+const baseRectSize = ref<number>(15);
+const shapeTableRow = ref<number>(20); // xcount
+const shapeTableCol = ref<number>(20); // ycount
+
+// 图片像素化处理列表
+const imgPixeledList = ref<any[]>([]);
+const isLoadingImg = ref(false);
 
 // 是否已动态更新行和列
 const isDynamicUpdate = computed(() => {
@@ -45,7 +55,8 @@ const isDynamicUpdate = computed(() => {
   let preset = awsomePreset.value.find((item) => item.name === presetName);
   return (
     shapeTableRow.value != preset?.cellConfig.yCount ||
-    shapeTableCol.value != preset?.cellConfig.xCount
+    shapeTableCol.value != preset?.cellConfig.xCount ||
+    baseRectSize.value != preset?.cellConfig.size
   );
 });
 
@@ -54,10 +65,10 @@ const awsomePreset = ref([
   {
     name: "基础预设",
     cellConfig: {
-      size: 5,
+      size: 15,
       border: 0.5,
-      xCount: 12,
-      yCount: 12,
+      xCount: 20,
+      yCount: 20,
     },
     colors: ["#000000", "#ffffff", "#1e80ff", "#f53f3f"],
   },
@@ -66,8 +77,8 @@ const awsomePreset = ref([
     cellConfig: {
       size: 5,
       border: 0.5,
-      xCount: 15,
-      yCount: 24,
+      xCount: 20,
+      yCount: 20,
     },
     colors: [
       "#564A54",
@@ -86,10 +97,18 @@ const resetStage = () => {
   isFillMode.value = false;
   mode.value = MouseMode.BASIC;
   Stage.value.getStage() && Stage.value.getStage().removeAll();
+  PixelRectFrame.value = null;
 };
 
+const resetGround = () => {
+  imgPixeledList.value = [];
+  fileInput.value.value = "";
+  Stage.value.getGround() && Stage.value.getGround().removeAll();
+  GroundCanvas.value = null;
+};
 const resetAndRebuildStage = () => {
   resetStage();
+  resetGround();
   genPixelCanvasFrame();
 };
 // 画板, 画板是可交互区域
@@ -132,6 +151,7 @@ const genPixelCells = () => {
         height: baseRectSize.value,
         fill: "white",
         draggable: false,
+        rectName: `${xIndex}-${yIndex}-pixel`,
       };
       const rect = new Rect(attrs);
       //   stage.addRect(rect, PixelRectFrame.value);
@@ -384,6 +404,7 @@ const upodatePresetFromDynamicAttr = () => {
     let config = awsomePreset.value[index].cellConfig;
     awsomePreset.value[index].cellConfig = {
       ...config,
+      size: baseRectSize.value,
       yCount: shapeTableCol.value,
       xCount: shapeTableRow.value,
     };
@@ -453,6 +474,146 @@ const exportImage2 = () => {
   downloadPNGForCanvas(canvas.canvas.toDataURL() as string, "test.png");
   canvas.destroy();
 };
+
+const uploadFile = (e: any) => {
+  isLoadingImg.value = true;
+  let file = e.target.files[0];
+  console.log(`正在绘图`, file);
+  console.time();
+  const img = new Image();
+
+  const ratio = window.devicePixelRatio;
+  const fileReader = new FileReader();
+  fileReader.readAsDataURL(file);
+
+  fileReader.onload = (readerEvent) => {
+    img.src = readerEvent.target?.result as string;
+    img.onload = () => {
+      resetGround();
+      const canvas: Canvas = new Canvas({
+        x: 100,
+        y: 100,
+        width: img.width,
+        height: img.height,
+        stroke: "black",
+        strokeWidth: 1,
+      });
+      GroundCanvas.value = canvas;
+      const { context } = canvas;
+      console.log(`img`, img.width, img.height);
+      context.drawImage(img, 0, 0, img.width * ratio, img.height * ratio);
+
+      Stage.value.getGround().add(canvas);
+
+      imgPixeledList.value.push({
+        // 已经绘制好图片的canvas对象
+        canvas: canvas,
+        // 目标像素容器
+        targetFrame: PixelRectFrame.value,
+      });
+
+      isLoadingImg.value = false;
+
+      startAutoPixeledImg();
+      console.log(`绘图完成`);
+      console.timeEnd();
+      e.target.files = null;
+    };
+  };
+};
+
+// rectName = 0-0-pixel size 5 size 为 图片的size
+// 获取一个正方形格子的中心点坐标值
+const getRectCenterPoint = (rectName: string, size: number) => {
+  const [row, col] = rectName.split("-");
+  const ratio = window.devicePixelRatio;
+  const x = (Number(row) + 0.5) * size * ratio;
+  const y = (Number(col) + 0.5) * size * ratio;
+  return { x, y };
+};
+
+// 根据图片大小和size, 重置行和列数
+const resetFrameByImage = (canvas: Canvas) => {
+  return {
+    col: Math.ceil(canvas.height / baseRectSize.value),
+    row: Math.ceil(canvas.width / baseRectSize.value),
+  };
+};
+// 获取位置
+const getPointPositions = (canvas: Canvas) => {
+  const pointsConfig = [];
+  // TODO 确保整个图片都被采集到, 用长边除方格
+  // const size = canvas.width
+  // 取色个数为 x轴 就是 图片宽 / 像素x数  y轴个数 图片高 / 像素y数  然后再取中间点
+  for (let x = 0; x < shapeTableRow.value; x++) {
+    for (let y = 0; y < shapeTableCol.value; y++) {
+      // 对应的recName, 取点的位置, 取后色值
+      let rectName = `${x}-${y}-pixel`;
+      let pointConfig = {
+        rectName,
+        pointPosition: getRectCenterPoint(rectName, baseRectSize.value),
+        color: "",
+      };
+      pointsConfig.push(pointConfig);
+    }
+  }
+
+  return pointsConfig;
+};
+
+const getPixelColorByPoint = (
+  canvas: Canvas,
+  position: { x: number; y: number }
+) => {
+  try {
+    let colors = getPixelColor(canvas, position.x, position.y);
+    return colors.rgba;
+  } catch (err) {
+    return "#000000";
+  }
+};
+// 取点逻辑, 每个格子先取一个点, 测试
+// 先根据图片, 自动把像素格调整为对应大小
+// 组装图片的取色点和像素格之间的映射关系
+const startAutoPixeledImg = async () => {
+  imgPixeledList.value.forEach((config) => {
+    // let parsePoints = [];
+    // const { canvas, targetFrame, shapeTableConfig } = config;
+    const { col, row } = resetFrameByImage(config.canvas);
+    console.log(`根据图片大小, 调整行x列为 => ${row} x ${col}`);
+    shapeTableCol.value = col;
+    shapeTableRow.value = row;
+    resetStage();
+    genPixelCanvasFrame();
+    // resetAndRebuildStage();
+
+    const pointsConfig = getPointPositions(config.canvas);
+    const rectColorMap: any = {};
+    pointsConfig.forEach((item) => {
+      item.color = getPixelColorByPoint(config.canvas, item.pointPosition);
+      rectColorMap[item.rectName] = item.color;
+    });
+    // 优化 先转map 再用children直接填色   1800ms => 80ms
+    PixelRectFrame.value.children.forEach((rect: Rect) => {
+      rect.fill = rectColorMap[rect.rectName as string];
+    });
+    console.log(PixelRectFrame.value.children);
+    // const rect = Stage.value.getStage().findOne((rect: Rect) => {
+    //     return rect.rectName === item.rectName ? 1 : 0;
+    //   });
+    //   rect && (rect.fill = item.color);
+    console.log("pointsConfig", pointsConfig);
+  });
+};
+
+// 重新生成
+const rerunAutoPixeled = () => {
+  console.time();
+  resetStage();
+  genPixelCanvasFrame();
+  startAutoPixeledImg();
+  console.timeEnd();
+};
 onMounted(() => {
   initByLeafer();
   bindKeyboardEvent();
@@ -503,6 +664,15 @@ onMounted(() => {
         :style="{ backgroundColor: color }"
         @click="changeColor(color)"
       />
+    </div>
+    <div>
+      <input
+        v-model="baseRectSize"
+        type="number"
+        placeholder="尺寸"
+        class="mr-2 max-w-xs w-16 text-4 text-primary font-bold input input-sm"
+      />
+      <span class="text-sm">(正方格-px)</span>
     </div>
     <div class="countxy mt-2 flex items-center justify-center">
       <input
@@ -559,10 +729,21 @@ onMounted(() => {
     <button class="mb-2 mt-2 btn btn-primary" @click="exportImage2">
       导出图片
     </button>
+    <!-- <button class="mb-2 mt-2 btn btn-primary" @click="importImage">
+      导入图片
+    </button> -->
+
+    <input
+      type="file"
+      ref="fileInput"
+      class="file-input file-input-bordered file-input-primary w-full max-w-xs"
+      @change="uploadFile"
+    />
+
     <button class="btn btn-secondary" @click="resetAndRebuildStage">
       清空颜色
     </button>
-    <button
+    <!-- <button
       class="btn btn-secondary"
       @click="updatePixelAreaSize(Direction.TOP)"
     >
@@ -585,8 +766,10 @@ onMounted(() => {
       @click="updatePixelAreaSize(Direction.RIGHT)"
     >
       right++
+    </button> -->
+    <button class="btn btn-secondary" @click="rerunAutoPixeled">
+      重新生成
     </button>
-
     <button
       v-if="isDynamicUpdate"
       class="btn btn-secondary"
