@@ -13,7 +13,7 @@ const version = ref({ __APP_VERSION__ });
 
 <template>
   <div
-    class="sticky top-0 z-30 h-16 w-full flex justify-center text-base-content opacity-90 backdrop-blur transition-all duration-100"
+    class="sticky top-0 z-30 h-16 w-full flex justify-center text-base-content opacity-90 backdrop-blur transition-all duration-100 shadow-lg"
   >
     <nav class="w-full navbar">
       <div class="flex flex-1 lg:gap-2 md:gap-1">
@@ -45,8 +45,9 @@ const version = ref({ __APP_VERSION__ });
         <!-- <ThemeChange /> -->
         <!-- <LocalesChange /> -->
         <span id="busuanzi_container_site_pv"
-          >总访问量:<span id="busuanzi_value_site_pv" />人</span
+          >总访问量:<span id="busuanzi_value_site_pv">人</span></span
         >
+        <!-- <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span> -->
 
         <span
           class="tooltip tooltip-bottom before:text-xs before:content-[attr(data-tip)]"

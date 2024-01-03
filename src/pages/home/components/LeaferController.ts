@@ -5,9 +5,9 @@ import {
   Group,
   Frame,
   Box,
-  LeaferEvent,
   PointerEvent,
   UI,
+  Cursor,
 } from "leafer-ui";
 import {
   IEventListenerId,
@@ -86,7 +86,9 @@ export class LeaferController {
       type: "draw",
     });
     this.app.add(this.app.ground);
-
+    Cursor.set("btn-clear", {
+      url: "http://img.zzstudio.cn/cursor-clear16.svg",
+    });
     this.setStage(stageConfig);
   }
 
@@ -119,7 +121,6 @@ export class LeaferController {
 
   setFillConfig(key: string, value: string) {
     this.fillConfig[key] = value;
-    console.log(`this.fillConfig`, this.fillConfig);
   }
 
   setZoomLayer(group: Group) {

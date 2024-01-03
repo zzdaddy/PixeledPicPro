@@ -7,10 +7,15 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    Modal: typeof import('./../src/components/Modal/index.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Select: typeof import('./../src/components/Select/index.vue')['default']
     Toast: typeof import('./../src/components/Toast/index.vue')['default']
     UnoCSSIconButton: typeof import('./../src/components/Icon/UnoCSSIconButton.vue')['default']
+    ZButton: typeof import('./../src/components/ZButton/index.vue')['default']
+    ZModal: typeof import('./../src/components/ZModal/index.vue')['default']
+    ZSelect: typeof import('./../src/components/ZSelect/index.vue')['default']
+    ZToast: typeof import('./../src/components/ZToast/index.vue')['default']
   }
 }

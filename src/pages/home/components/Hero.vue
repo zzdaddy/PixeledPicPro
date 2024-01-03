@@ -14,7 +14,7 @@ function testStore() {
     <div class="place-items-center" />
     <div class="text-center hero-content">
       <div class="max-w-md">
-        <h1 class="mb-5 text-5xl font-bold">此处应该有一个动图</h1>
+        <h1 class="mb-5 text-5xl font-bold">功能开发中,略显简陋</h1>
         <p class="mb-5" />
         <button class="btn btn-primary" @click="testStore">开始创作</button>
       </div>
