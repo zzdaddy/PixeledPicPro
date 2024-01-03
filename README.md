@@ -83,6 +83,7 @@ docker run --rm -it -p 8080:80 viteboot:latest
 ### V0.11.0
 - 界面重构
 - 新增动态减少行和列的功能
+- 新增橡皮擦及橡皮擦自定义的鼠标
 - 修复bug: 重复创建了Frame
 
 
