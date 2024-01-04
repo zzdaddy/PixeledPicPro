@@ -9,6 +9,7 @@ import {
   UI,
   Cursor,
 } from "leafer-ui";
+
 import {
   IEventListenerId,
   IFunction,
@@ -16,6 +17,7 @@ import {
   IObject,
 } from "@leafer-ui/interface";
 import { isRef } from "vue";
+import BtnClearSVG from "~/assets/cursor-clear16.svg";
 type viewParam = string | Ref | HTMLElement;
 type LeaferConfig = {
   width?: number;
@@ -87,7 +89,7 @@ export class LeaferController {
     });
     this.app.add(this.app.ground);
     Cursor.set("btn-clear", {
-      url: "http://img.zzstudio.cn/cursor-clear16.svg",
+      url: BtnClearSVG,
     });
     this.setStage(stageConfig);
   }
@@ -255,5 +257,15 @@ export class LeaferController {
         this.addBaseShape(this.app.tree, rect);
       });
     }
+  }
+
+  removeStage() {
+    this.app.tree.removeAll();
+    Object.keys(this.InnerContainer).forEach((key: unknown) => {
+      this.offInnerEvent(this.InnerContainer[key as number]);
+    });
+    this.InnerContainer = {};
+    this.innerShape = {};
+    this.innerEvent = {};
   }
 }

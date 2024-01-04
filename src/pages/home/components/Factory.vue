@@ -5,6 +5,10 @@ import { logger } from "@kirklin/logger";
 import { downloadPNGForCanvas, getPixelColor } from "~/utils/canvas";
 import { Rect, Canvas, Frame } from "leafer-ui";
 import { LeaferController, MouseMode } from "./LeaferController";
+import BtnClear from "~/assets/btn-clear.png";
+import BtnDownload from "~/assets/btn-download.png";
+import BtnSetting from "~/assets/btn-setting.png";
+import BtnStart from "~/assets/btn-start.png";
 // const permissionRead = usePermission('clipboard-read')
 // const permissionWrite = usePermission('clipboard-write')
 // 为何注释 ? 请看components的readme.md
@@ -97,7 +101,7 @@ const awsomePreset = ref([
 const resetStage = () => {
   isFillMode.value = false;
   mode.value = MouseMode.BASIC;
-  Stage.value.getStage() && Stage.value.getStage().removeAll();
+  Stage.value.removeStage();
   PixelRectFrame.value = null;
 };
 
@@ -688,10 +692,10 @@ const closePresetSetting = () => {
 // 橡皮擦, 即设置成一个特殊的颜色, 导出时清除即可
 const setClearFillConfig = () => {
   // 自定义svg鼠标样式时, 16x16比较符合原始鼠标图标尺寸
-  if (PixelRectFrame.value.cursor === "btn-clear") {
+  if (PixelRectFrame.value.cursor === "cell") {
     changeColor(colorConfig.value[0]);
   } else {
-    PixelRectFrame.value.cursor = "btn-clear";
+    PixelRectFrame.value.cursor = "cell";
     Stage.value.setFillConfig("color", "rgba(255,255,255,0.75)");
   }
 };
@@ -718,14 +722,14 @@ onMounted(() => {
   <div class="top-action-bar flex flex-nowrap fixed top-17 right-8 w-180 h-8">
     <ZButton
       tooltip="导入图片自动生成"
-      imgSrc="src/assets/btn-setting.png"
+      :imgSrc="BtnSetting"
       btnText="图片"
       @tap="openFileSelect"
       btnClass="btn-primary mr-2"
     />
     <ZButton
       tooltip="会根据图片和单元格大小重新构造"
-      imgSrc="src/assets/btn-setting.png"
+      :imgSrc="BtnSetting"
       btnText="重构"
       @tap="rerunAutoPixeled"
       btnClass="btn-primary mr-2"
@@ -735,7 +739,7 @@ onMounted(() => {
     <ZModal ref="presetModal">
       <ZButton
         tooltip="打开预设面板"
-        imgSrc="src/assets/btn-setting.png"
+        :imgSrc="BtnSetting"
         btnText="预设"
         btnClass="btn-primary mr-2"
         @tap="showPresetSetting"
@@ -813,21 +817,21 @@ onMounted(() => {
     </ZModal>
     <ZButton
       tooltip="按设置生成画板(会清空颜色)"
-      imgSrc="src/assets/btn-start.png"
+      :imgSrc="BtnStart"
       btnText="生成"
       @tap="resetAndRebuildStage"
       btnClass="btn-primary mr-2"
     />
     <ZButton
       tooltip="下载无背景png图片"
-      imgSrc="src/assets/btn-download.png"
+      :imgSrc="BtnDownload"
       btnText="下载"
       @tap="exportImage2"
       btnClass="btn-primary mr-2"
     />
     <ZButton
       tooltip="清空所有填色"
-      imgSrc="src/assets/btn-clear.png"
+      :imgSrc="BtnClear"
       btnText="清除"
       @tap="resetAndRebuildStage"
       btnClass="btn-secondary"
