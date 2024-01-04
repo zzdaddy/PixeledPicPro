@@ -229,6 +229,8 @@ export class LeaferController {
     if (!this.InnerContainer[container.innerId]) {
       this.InnerContainer[container.innerId] = container;
     }
+    console.log(`增加container`);
+    // leafer.removeAll();
     leafer.add(container);
   }
 
@@ -248,7 +250,9 @@ export class LeaferController {
   // Group没有办法定位和比对, 需要自己管理
   addRects(rects: Rect[], container?: StageContainer) {
     if (container) {
-      this.addStageContainer(this.app.tree, container);
+      if (!this.InnerContainer[container.innerId]) {
+        this.addStageContainer(this.app.tree, container);
+      }
       rects.forEach((rect: Rect) => {
         this.addBaseShape(container, rect);
       });

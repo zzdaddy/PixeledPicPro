@@ -155,7 +155,7 @@ const genPixelCells = () => {
         y: baseRectSize.value * yIndex,
         width: baseRectSize.value,
         height: baseRectSize.value,
-        fill: "rgba(255,255,255,0.75)",
+        fill: "#ebe5ef",
         draggable: false,
         rectName: `${xIndex}-${yIndex}-pixel`,
       };
@@ -266,7 +266,7 @@ const setDynamicRects = (direction: Direction, count: number = 1) => {
         y,
         width: baseRectSize.value,
         height: baseRectSize.value,
-        fill: "rgba(255,255,255,0.75)",
+        fill: "#ebe5ef",
         draggable: false,
       };
       const rect = new Rect(attrs);
@@ -319,6 +319,7 @@ const updatePixelAreaSize = (direction: Direction, count: number = 1) => {
   }
   resetRectNames();
   PixelRectFrame.value.forceUpdate();
+  Stage.value.getStage().forceFullRender();
   console.log(`PixelRectFrame.value.height`, PixelRectFrame.value.height);
 };
 
@@ -541,7 +542,7 @@ const exportImage2 = () => {
   });
   // 导出时, 清除背景
   PixelRectFrame.value.children.forEach((rect: Rect) => {
-    if (rect.fill === "rgba(255,255,255,0.75)") {
+    if (rect.fill === "#ebe5ef") {
       rect.fill = "rgba(0,0,0,0)";
     }
   });
@@ -696,7 +697,7 @@ const setClearFillConfig = () => {
     changeColor(colorConfig.value[0]);
   } else {
     PixelRectFrame.value.cursor = "cell";
-    Stage.value.setFillConfig("color", "rgba(255,255,255,0.75)");
+    Stage.value.setFillConfig("color", "#ebe5ef");
   }
 };
 
@@ -901,34 +902,32 @@ onMounted(() => {
       />
     </div>
     <div class="flex justify-center w-full tooltip" data-tip="增减顶部的行">
-      <kbd class="kbd" @click="updatePixelAreaSize(Direction.TOP, 1)">▲</kbd>
-      <kbd class="kbd" @click="updatePixelAreaSize(Direction.TOP, -1)">▼</kbd>
+      <kbd class="kbd" @click="updatePixelAreaSize(Direction.TOP, 1)">+</kbd>
+      <kbd class="kbd" @click="updatePixelAreaSize(Direction.TOP, -1)">-</kbd>
     </div>
     <div class="flex justify-center gap-20 w-full">
       <div class="tooltip" data-tip="增减左侧的列">
-        <kbd class="kbd" @click="updatePixelAreaSize(Direction.LEFT, 1)"
-          >◀︎</kbd
-        >
+        <kbd class="kbd" @click="updatePixelAreaSize(Direction.LEFT, 1)">+</kbd>
         <kbd class="kbd" @click="updatePixelAreaSize(Direction.LEFT, -1)"
-          >▶︎</kbd
+          >-</kbd
         >
       </div>
       <div class="tooltip" data-tip="增减右侧的列">
         <kbd class="kbd" @click="updatePixelAreaSize(Direction.RIGHT, -1)"
-          >◀︎</kbd
+          >-</kbd
         >
         <kbd class="kbd" @click="updatePixelAreaSize(Direction.RIGHT, 1)"
-          >▶︎</kbd
+          >+</kbd
         >
       </div>
     </div>
     <div class="flex justify-center w-full tooltip" data-tip="增减底部的行">
       <kbd class="kbd" @click="updatePixelAreaSize(Direction.BOTTOM, -1)"
-        >▲</kbd
+        >-</kbd
       >
-      <kbd class="kbd" @click="updatePixelAreaSize(Direction.BOTTOM, 1)">▼</kbd>
+      <kbd class="kbd" @click="updatePixelAreaSize(Direction.BOTTOM, 1)">+</kbd>
     </div>
-    <button class="btn btn-accent btn-sm" @click="setClearFillConfig">
+    <button class="btn btn-accent btn-sm mb-2 mt-2" @click="setClearFillConfig">
       橡皮擦
     </button>
     <input
@@ -943,56 +942,7 @@ onMounted(() => {
       class="absolute left--60 textarea textarea-primary textarea-md"
       placeholder="json"
     />
-    <!-- <div class="relative">
-      <textarea
-        v-show="false"
-        v-model="copyPreset"
-        class="absolute left--60 textarea textarea-primary textarea-md"
-        placeholder="json"
-      />
-      <button class="mt-2 w-full btn btn-primary" @click="exportPreset">
-        {{ isSupported ? "导出预设" : "不支持导出" }}
-      </button>
-    </div> -->
 
-    <div class="relative mt-2">
-      <!-- <textarea v-if="showPasteTextarea" v-model="pastePreset" class="absolute left--60 textarea textarea-md textarea-primary" placeholder="json"></textarea> -->
-    </div>
-
-    <!-- <button class="flex bg-transparent" @click="exportImage2"></button> -->
-    <!-- <button class="flex bg-transparent" @click="resetAndRebuildStage"></button> -->
-
-    <!-- <button class="mb-2 mt-2 btn btn-primary" @click="importImage">
-      导入图片
-    </button> -->
-
-    <!-- <button
-      class="btn btn-secondary"
-      @click="updatePixelAreaSize(Direction.TOP)"
-    >
-      TOP++
-    </button>
-    <button
-      class="btn btn-secondary"
-      @click="updatePixelAreaSize(Direction.BOTTOM)"
-    >
-      Bottom++
-    </button>
-    <button
-      class="btn btn-secondary"
-      @click="updatePixelAreaSize(Direction.LEFT)"
-    >
-      left++
-    </button>
-    <button
-      class="btn btn-secondary"
-      @click="updatePixelAreaSize(Direction.RIGHT)"
-    >
-      right++
-    </button> -->
-    <!-- <button class="btn btn-secondary btn-xs" @click="rerunAutoPixeled">
-      重新生成
-    </button> -->
     <button
       v-if="isDynamicUpdate"
       class="btn btn-secondary"
