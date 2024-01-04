@@ -719,6 +719,14 @@ onMounted(() => {
 <template>
   <div ref="canvasContainerRef" id="canvasContainerRef" class="flex-1" />
 
+  <div
+    class="top-tip-bar flex flex-nowrap fixed top-17 left-8 w-180 h-8 text-sm"
+  >
+    <span class="mr-2">
+      <span class="text-secondary">缩放:</span>cmd/ctrl+鼠标滚轮</span
+    >
+    <span> <span class="text-secondary">拖动:</span> 空格+左键</span>
+  </div>
   <div class="top-action-bar flex flex-nowrap fixed top-17 right-8 w-180 h-8">
     <ZButton
       tooltip="导入图片自动生成"
