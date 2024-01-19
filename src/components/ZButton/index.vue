@@ -1,4 +1,3 @@
-import { tap } from 'node:test/reporters';
 <template>
   <div :class="[tooltip && 'tooltip tooltip-bottom']" :data-tip="tooltip ?? ''">
     <button

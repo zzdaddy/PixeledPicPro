@@ -26,6 +26,9 @@ dependencies:
   iso-639-1:
     specifier: ^3.1.0
     version: 3.1.0
+  js-md5:
+    specifier: ^0.8.3
+    version: 0.8.3
   konva:
     specifier: ^9.2.3
     version: 9.2.3
@@ -47,6 +50,9 @@ dependencies:
   vue-router:
     specifier: ^4.2.5
     version: 4.2.5(vue@3.3.10)
+  vue3-toastify:
+    specifier: ^0.2.1
+    version: 0.2.1(vue@3.3.10)
 
 devDependencies:
   '@commitlint/cli':
@@ -6102,6 +6108,10 @@ packages:
       nopt: 6.0.0
     dev: true
 
+  /js-md5@0.8.3:
+    resolution: {integrity: sha512-qR0HB5uP6wCuRMrWPTrkMaev7MJZwJuuw4fnwAzRgP4J4/F8RwtodOKpGp4XpqsLBFzzgqIO42efFAyz2Et6KQ==}
+    dev: false
+
   /js-stringify@1.0.2:
     resolution: {integrity: sha512-rtS5ATOo2Q5k1G+DADISilDA6lv79zIiwFd6CcjuIxGKLFm5C+RLImRscVap9k55i+MOZwgliw+NejvkLuGD5g==}
     dev: true
@@ -8824,6 +8834,18 @@ packages:
       semver: 7.5.4
       typescript: 5.3.2
     dev: true
+
+  /vue3-toastify@0.2.1(vue@3.3.10):
+    resolution: {integrity: sha512-u4i5LCu1q5qs4L4Kbjb4u8NipCS8ox1fCHQ6XFS62676xnA6Q/AJRpZEkAurTMp723LeH6eQX6k9+24bKf1T4Q==}
+    engines: {node: '>=16', npm: '>=7'}
+    peerDependencies:
+      vue: '>=3.2.0'
+    peerDependenciesMeta:
+      vue:
+        optional: true
+    dependencies:
+      vue: 3.3.10(typescript@5.3.2)
+    dev: false
 
   /vue@3.3.10(typescript@5.3.2):
     resolution: {integrity: sha512-zg6SIXZdTBwiqCw/1p+m04VyHjLfwtjwz8N57sPaBhEex31ND0RYECVOC1YrRwMRmxFf5T1dabl6SGUbMKKuVw==}

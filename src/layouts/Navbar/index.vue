@@ -1,12 +1,24 @@
 <script setup lang="ts">
 // import ThemeChange from "./components/ThemeChange/index.vue";
 
-// import LocalesChange from "./components/LocalesChange/index.vue";
+// import { getUserInfo } from "~/api/user";
+import LoginModal from "./components/LoginModal/index.vue";
 import UnoCSSIconButton from "~/components/Icon/UnoCSSIconButton.vue";
-
+import appStore from "~/store/index";
 defineOptions({
   name: "Navbar",
 });
+
+// const userInfo: any = useStorage(Storage.USER_INFO, {}, localStorage);
+// console.log(`userInfo`, userInfo.value);
+const username = computed(() => {
+  return appStore.globalUser?.user?.nickname;
+});
+
+const handleLoginSuccess = async () => {
+  //   const user = await getUserInfo();
+  //   appStore.globalUser.setUserInfo(user);
+};
 // @ts-expect-error
 const version = ref({ __APP_VERSION__ });
 </script>
@@ -44,9 +56,16 @@ const version = ref({ __APP_VERSION__ });
       <div>
         <!-- <ThemeChange /> -->
         <!-- <LocalesChange /> -->
-        <span id="busuanzi_container_site_pv"
-          >总访问量:<span id="busuanzi_value_site_pv">人</span></span
-        >
+        <span class="mr-2" id="busuanzi_container_site_pv"
+          ><span class="text-primary text-sm" id="busuanzi_value_site_pv"></span
+        ></span>
+        <!-- <button class="btn btn-outline btn-sm glass" v-if="!!!userInfo">
+          登录
+        </button> -->
+        <LoginModal v-if="!!!username" @ok="handleLoginSuccess"></LoginModal>
+        <button class="btn btn-outline btn-sm glass">
+          {{ username }}
+        </button>
         <!-- <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span> -->
 
         <span

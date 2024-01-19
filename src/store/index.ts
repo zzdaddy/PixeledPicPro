@@ -1,5 +1,5 @@
 import { counter } from "./counter";
-
+import { globalUser } from "./user";
 const appStore: any = {};
 
 /**
@@ -7,6 +7,7 @@ const appStore: any = {};
  */
 export function registerStore() {
   appStore.counter = counter();
+  appStore.globalUser = globalUser();
 }
 
 export default appStore;

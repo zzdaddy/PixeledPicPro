@@ -1,7 +1,7 @@
 <template>
   <slot name="default"></slot>
   <dialog :id="props.modalId" class="modal" ref="myDialog">
-    <div class="modal-box w-11/12 max-w-5xl">
+    <div :class="`modal-box ${modalClass}`">
       <div class="modal-action">
         <form method="dialog">
           <button
@@ -20,6 +20,10 @@ const props = defineProps({
   modalId: {
     type: String,
     default: "zz_modal_7",
+  },
+  modalClass: {
+    type: String,
+    default: "w-11/12 max-w-5xl",
   },
   title: {
     type: String,

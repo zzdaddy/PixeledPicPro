@@ -1,14 +1,19 @@
 <script lang="ts" setup>
 import { onMounted, ref } from "vue";
-import { useClipboard } from "@vueuse/core";
+// import { useClipboard } from "@vueuse/core";
 import { logger } from "@kirklin/logger";
-import { downloadPNGForCanvas, getPixelColor } from "~/utils/canvas";
+import {
+  classifyColor,
+  downloadPNGForCanvas,
+  getPixelColor,
+} from "~/utils/canvas";
 import { Rect, Canvas, Frame } from "leafer-ui";
 import { LeaferController, MouseMode } from "./LeaferController";
 import BtnClear from "~/assets/btn-clear.png";
 import BtnDownload from "~/assets/btn-download.png";
 import BtnSetting from "~/assets/btn-setting.png";
 import BtnStart from "~/assets/btn-start.png";
+import { toast } from "vue3-toastify";
 // const permissionRead = usePermission('clipboard-read')
 // const permissionWrite = usePermission('clipboard-write')
 // 为何注释 ? 请看components的readme.md
@@ -18,9 +23,9 @@ declare module "leafer-ui" {
     rectName?: string;
   }
 }
-const { isSupported, copy } = useClipboard();
+// const { isSupported, copy } = useClipboard();
 
-type presetName = string;
+// type presetName = string;
 enum Direction {
   TOP = "top",
   BOTTOM = "bottom",
@@ -30,15 +35,16 @@ enum Direction {
 const Stage = ref();
 const PixelRectFrame = ref();
 const canvasContainerRef = ref();
-const presetSelector = ref();
+// const presetSelector = ref();
 const fileInput = ref();
-const toast = ref();
+// const toast = ref();
 const GroundCanvas = ref(); // 背景的canvas图, 用来获取元素
-const presetModal = ref();
+// const presetModal = ref();
 
-const copyPreset = ref<string>("");
+// const copyPreset = ref<string>("");
 const pastePreset = ref<string>("");
-const showPasteTextarea = ref<boolean>(true);
+// const showPasteTextarea = ref<boolean>(true);
+// const curPreset = ref<any>(null);
 // 是否是填充模式
 const isFillMode = ref<boolean>(false);
 // 是否已经动态变更
@@ -55,15 +61,14 @@ const imgPixeledList = ref<any[]>([]);
 const isLoadingImg = ref(false);
 
 // 当前行/列/单元格大小是否已经发生了改变, 用于去更新本地预设
-const isDynamicUpdate = computed(() => {
-  let presetName = presetSelector?.value?.getValue() || "基础预设";
-  let preset = awsomePreset.value.find((item) => item.name === presetName);
-  return (
-    shapeTableRow.value != preset?.cellConfig.yCount ||
-    shapeTableCol.value != preset?.cellConfig.xCount ||
-    baseRectSize.value != preset?.cellConfig.size
-  );
-});
+// const isDynamicUpdate = computed(() => {
+//   //   let preset = curPreset.value;
+//   return (
+//     shapeTableRow.value != curPreset.value?.cellConfig.yCount ||
+//     shapeTableCol.value != curPreset.value?.cellConfig.xCount ||
+//     baseRectSize.value != curPreset.value?.cellConfig.size
+//   );
+// });
 
 // 优秀的预设, 包含颜色配置, 尺寸大小
 const awsomePreset = ref([
@@ -320,7 +325,6 @@ const updatePixelAreaSize = (direction: Direction, count: number = 1) => {
   resetRectNames();
   PixelRectFrame.value.forceUpdate();
   Stage.value.getStage().forceFullRender();
-  console.log(`PixelRectFrame.value.height`, PixelRectFrame.value.height);
 };
 
 const resetRectNames = () => {
@@ -355,10 +359,10 @@ const changeColor = (color: string) => {
   Stage.value.setFillConfig("color", selectColor.value);
 };
 
-const selectPreset = (name: presetName) => {
-  console.log(`name`, name);
-  applyAwsomePreset(name);
-};
+// const selectPreset = (name: presetName) => {
+//   console.log(`name`, name);
+//   applyAwsomePreset(name);
+// };
 
 // 检查preset是否合法
 const checkPreset = (preset: any) => {
@@ -373,45 +377,40 @@ const checkPreset = (preset: any) => {
     }
   }
 
-  toast.value.show({
-    msg: "预设不合法, 请检查后重试",
+  toast("预设不合法, 请检查后重试", {
     type: "error",
   });
   return false;
 };
 
-const applyAwsomePreset = (name: presetName) => {
-  logger.info(`切换预设 =>${name}`);
-  const preset = awsomePreset.value.find((item) => item.name === name);
-  if (preset) {
-    copyPreset.value = JSON.stringify(preset, null, 2);
-    const { cellConfig, colors } = preset;
-    // 设置当前配置
-    baseRectSize.value = cellConfig.size;
-    shapeTableCol.value = cellConfig.yCount;
-    shapeTableRow.value = cellConfig.xCount;
-    colorConfig.value = colors;
-    resetAndRebuildStage();
-    closePresetSetting();
-    // 根据预设生成
-    // genRectPixelBox()
-  } else {
-    toast.value.show({
-      msg: "不存在的预设",
-      type: "error",
-    });
-  }
+const applyAwsomePreset = (preset?: any) => {
+  if (!preset) return;
+  logger.info(`切换预设 =>${preset.name}`);
+  //   copyPreset.value = JSON.stringify(preset, null, 2);
+  const { cellConfig, colors } = preset;
+  // 设置当前配置
+  baseRectSize.value = cellConfig.size;
+  shapeTableCol.value = cellConfig.yCount;
+  shapeTableRow.value = cellConfig.xCount;
+  colorConfig.value = colors;
+  resetAndRebuildStage();
+  toast(`已切换到预设[${preset.name}]`, {
+    type: "success",
+    autoClose: 1200,
+  });
+  // closePresetSetting();
+  // 根据预设生成
+  // genRectPixelBox()
 };
 
-const exportPreset = () => {
-  if (isSupported) {
-    copy(copyPreset.value);
-    toast.value.show({
-      type: "success",
-      msg: "已复制到剪切板!",
-    });
-  }
-};
+// const exportPreset = () => {
+//   if (isSupported) {
+//     copy(copyPreset.value);
+//     toast("已复制到剪切板!", {
+//       type: "success",
+//     });
+//   }
+// };
 
 const filterNoRepeatPresets = (presets: any[]) => {
   const newPresets: any[] = [];
@@ -437,19 +436,18 @@ const loadLocalPreset = () => {
           presets.concat(awsomePreset.value)
         );
         awsomePreset.value = newPresets.concat();
-        applyAwsomePreset("基础预设");
+        applyAwsomePreset();
       }
     } catch (err) {
-      toast.value.show({
-        msg: "本地预设加载失败",
+      toast("本地预设加载失败", {
         type: "error",
       });
-      applyAwsomePreset("基础预设");
+      applyAwsomePreset();
       return false;
     }
   } else {
     logger.info("无本地预设");
-    applyAwsomePreset("基础预设");
+    applyAwsomePreset();
   }
 };
 
@@ -464,25 +462,24 @@ const saveLocalPreset = (newPresets: any[]) => {
 };
 
 // 把当前动态属性更新到预设上
-const upodatePresetFromDynamicAttr = () => {
-  let presetName = presetSelector?.value?.getValue() || "基础预设";
-  let index = awsomePreset.value.findIndex((item) => item.name === presetName);
-  if (index !== -1) {
-    let config = awsomePreset.value[index].cellConfig;
-    awsomePreset.value[index].cellConfig = {
-      ...config,
-      size: baseRectSize.value,
-      yCount: shapeTableCol.value,
-      xCount: shapeTableRow.value,
-    };
+// const upodatePresetFromDynamicAttr = () => {
+//   let presetName = curPreset?.value?.name || "基础预设";
+//   let index = awsomePreset.value.findIndex((item) => item.name === presetName);
+//   if (index !== -1) {
+//     let config = awsomePreset.value[index].cellConfig;
+//     awsomePreset.value[index].cellConfig = {
+//       ...config,
+//       size: baseRectSize.value,
+//       yCount: shapeTableCol.value,
+//       xCount: shapeTableRow.value,
+//     };
 
-    saveLocalPreset(awsomePreset.value);
-    toast.value.show({
-      type: "success",
-      msg: "预设已更新到本地!",
-    });
-  }
-};
+//     saveLocalPreset(awsomePreset.value);
+//     toast("预设已更新到本地!", {
+//       type: "success",
+//     });
+//   }
+// };
 // 监听 -> 应用 -> 存本地
 watch(pastePreset, (json) => {
   try {
@@ -495,16 +492,15 @@ watch(pastePreset, (json) => {
       );
       saveLocalPreset(newPresets);
       // 选中
-      selectPreset(preset.name);
-      presetSelector.value.setValue(preset.name);
-      toast.value.show({
-        msg: `[${preset.name}]已导入!开始体验吧!`,
+      //   selectPreset(preset.name);
+      //   presetSelector.value.setValue(preset.name);
+      toast(`[${preset.name}]已导入!开始体验吧!`, {
         type: "success",
       });
     }
   } catch (err) {
-    toast.value.show({
-      msg: "预设不合法, 请检查后重试",
+    console.error(err);
+    toast("预设不合法, 请检查后重试", {
       type: "error",
     });
     return false;
@@ -645,6 +641,10 @@ const getPixelColorByPoint = (
 ) => {
   try {
     let colors = getPixelColor(canvas, position.x, position.y);
+    console.log(
+      `classifyColor=[${[colors.r, colors.g, colors.b]}]`,
+      classifyColor(colors.r, colors.g, colors.b)
+    );
     return colors.rgba;
   } catch (err) {
     return "#000000";
@@ -683,12 +683,12 @@ const startAutoPixeledImg = async () => {
     // console.log("pointsConfig", pointsConfig);
   });
 };
-const showPresetSetting = () => {
-  presetModal.value.openModal();
-};
-const closePresetSetting = () => {
-  presetModal.value.closeModal();
-};
+// const showPresetSetting = () => {
+//   presetModal.value.openModal();
+// };
+// const closePresetSetting = () => {
+//   presetModal.value.closeModal();
+// };
 
 // 橡皮擦, 即设置成一个特殊的颜色, 导出时清除即可
 const setClearFillConfig = () => {
@@ -744,86 +744,7 @@ onMounted(() => {
       btnClass="btn-primary mr-2"
     />
     <div class="divider divider-horizontal"></div>
-
-    <ZModal ref="presetModal">
-      <ZButton
-        tooltip="打开预设面板"
-        :imgSrc="BtnSetting"
-        btnText="预设"
-        btnClass="btn-primary mr-2"
-        @tap="showPresetSetting"
-      />
-      <template #content>
-        <!-- <h3 class="font-bold text-lg">全部预设</h3> -->
-        <div class="overscroll-y-auto flex flex-wrap gap-2">
-          <div
-            class="tooltip-top w-full tooltip"
-            data-tip="复制到输入框内会自动导入"
-          >
-            <div class="w-30 dropdown dropdown-left">
-              <div tabindex="0" role="button" class="w-full btn btn-primary">
-                导入预设
-              </div>
-              <div
-                tabindex="0"
-                class="dropdown-content z-[1] bg-base-100 p-2 shadow menu rounded-box"
-              >
-                <textarea
-                  v-if="showPasteTextarea"
-                  v-model="pastePreset"
-                  class="textarea textarea-primary textarea-md"
-                  placeholder="json"
-                />
-              </div>
-            </div>
-          </div>
-          <template v-for="config in awsomePreset">
-            <div class="card w-1/4 bg-base-100 shadow-xl">
-              <figure>
-                <div class="colors flex w-auto h-20 overflow-hidden">
-                  <div
-                    class="w-10 h-10"
-                    v-for="color in config.colors"
-                    :style="{ backgroundColor: color }"
-                  ></div>
-                </div>
-              </figure>
-              <div class="card-body">
-                <h2 class="card-title">
-                  {{ config.name }}
-                  <div class="badge badge-secondary">NEW</div>
-                </h2>
-                <p>
-                  单元格(方格)
-                  <span class="text-primary font-bold text-xl">{{
-                    `${config.cellConfig.size} x ${config.cellConfig.size}`
-                  }}</span>
-                  px
-                </p>
-                <p>
-                  单元格数量
-                  <span class="text-primary font-bold text-xl">{{
-                    `${config.cellConfig.xCount} x ${config.cellConfig.yCount}`
-                  }}</span>
-                  个
-                </p>
-                <div class="card-actions justify-end">
-                  <button class="btn btn-sm btn-accent" @click="exportPreset">
-                    {{ isSupported ? "复制" : "不支持复制" }}
-                  </button>
-                  <button
-                    class="btn btn-sm btn-primary"
-                    @click="() => applyAwsomePreset(config.name)"
-                  >
-                    使用
-                  </button>
-                </div>
-              </div>
-            </div>
-          </template>
-        </div>
-      </template>
-    </ZModal>
+    <PresetListModal @apply="applyAwsomePreset"></PresetListModal>
     <ZButton
       tooltip="按设置生成画板(会清空颜色)"
       :imgSrc="BtnStart"
@@ -936,21 +857,21 @@ onMounted(() => {
       class="file-input file-input-bordered file-input-sm file-input-primary h-0"
       @change="uploadFile"
     />
-    <textarea
+    <!-- <textarea
       v-show="false"
       v-model="copyPreset"
       class="absolute left--60 textarea textarea-primary textarea-md"
       placeholder="json"
-    />
+    /> -->
 
-    <button
+    <!-- <button
       v-if="isDynamicUpdate"
       class="btn btn-secondary"
       @click="upodatePresetFromDynamicAttr"
     >
       保存预设
-    </button>
+    </button> -->
   </div>
 
-  <ZToast ref="toast" />
+  <!-- <ZToast ref="toast" /> -->
 </template>
