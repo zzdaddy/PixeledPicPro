@@ -33,7 +33,7 @@ type StageContainer = Group | Frame | Box;
 // type MouseMode = "basic" | "draw" | "clip" | "fill";
 
 type LeaferInnerId = number;
-type EventName = string;
+// type EventName = string;
 type InnerContainer = {
   [key: LeaferInnerId]: StageContainer;
 };
@@ -60,8 +60,8 @@ type FillConfig = {
 export class LeaferController {
   private app!: App;
   private containerView: viewParam;
-  private groups?: Group[];
-  private mouseMode: MouseMode = MouseMode.BASIC;
+  //   private groups?: Group[];
+  public mouseMode: MouseMode = MouseMode.BASIC;
   private InnerContainer: InnerContainer = {}; // 所有的容器对象
   private innerShape: InnerShape = {}; // 所有的形状对象
   private innerEvent: InnerEvent = {}; // 已经绑定的事件
