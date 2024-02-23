@@ -7,7 +7,13 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    AButton: typeof import('@arco-design/web-vue')['Button']
+    AInput: typeof import('@arco-design/web-vue')['Input']
     ColorPickerModal: typeof import('./../src/components/ColorPickerModal/index.vue')['default']
+    IconCheckCircle: typeof import('@arco-design/web-vue/es/icon')['IconCheckCircle']
+    IconDragArrow: typeof import('@arco-design/web-vue/es/icon')['IconDragArrow']
+    IconPlus: typeof import('@arco-design/web-vue/es/icon')['IconPlus']
+    IconThumbUpFill: typeof import('@arco-design/web-vue/es/icon')['IconThumbUpFill']
     PresetListModal: typeof import('./../src/components/PresetListModal/index.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

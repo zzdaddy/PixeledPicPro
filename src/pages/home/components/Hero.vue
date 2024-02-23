@@ -15,9 +15,20 @@ function testStore() {
     <div class="place-items-center" />
     <div class="text-center hero-content">
       <div class="max-w-md">
-        <h1 class="mb-5 text-5xl font-bold">功能开发中,略显简陋</h1>
+        <!-- <h1 class="mb-5 text-5xl font-bold">功能开发中,略显简陋</h1> -->
+        <!-- <a-button type="primary">测试</a-button>
+        <a-button type="primary">测试</a-button>
+        <a-button type="primary">测试</a-button>
+        <a-input
+          :style="{ width: '320px' }"
+          default-value="content"
+          placeholder="Please enter something"
+          allow-clear
+        /> -->
+
         <p class="mb-5" />
-        <button class="btn btn-primary" @click="testStore">开始创作</button>
+        <a-button type="primary" @click="testStore">开始创作</a-button>
+        <!-- <button class="btn btn-primary" @click="testStore">开始创作</button> -->
       </div>
     </div>
   </div>

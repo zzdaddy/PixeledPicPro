@@ -8,10 +8,12 @@ import IconsResolver from "unplugin-icons/resolver";
 import Inspect from "vite-plugin-inspect";
 import { VitePWA } from "vite-plugin-pwa";
 import VueDevTools from "vite-plugin-vue-devtools";
-
+import { ArcoResolver } from "unplugin-vue-components/resolvers";
 // vite.config.ts
 import VueI18nPlugin from "@intlify/unplugin-vue-i18n/vite";
 import UnoCss from "unocss/vite";
+import { vitePluginForArco } from "@arco-plugins/vite-vue";
+
 // const isDev = process.env.NODE_ENV === "development";
 // import packageJson from './package.json';
 const packageJson = require("./package.json");
@@ -53,7 +55,9 @@ export default defineConfig({
         "@vueuse/head",
         "@vueuse/core",
       ],
+      resolvers: [ArcoResolver()],
       dts: "types/auto-imports.d.ts",
+      // 自动引入components
       dirs: ["src/composables", "src/store"],
       vueTemplate: true,
     }),
@@ -68,9 +72,19 @@ export default defineConfig({
         /[\\/]\.git[\\/]/,
         /[\\/]\.nuxt[\\/]/,
       ],
-      resolvers: [IconsResolver()],
+      resolvers: [
+        IconsResolver(),
+        ArcoResolver({
+          //   importStyle: "less", // 可以不写
+          resolveIcons: true,
+          // 这里必须设置为 true，否则 yarn build 不会将自动导入的 arco 组件的样式文件打包
+          sideEffect: true,
+        }),
+      ],
     }),
-
+    vitePluginForArco({
+      theme: "@arco-themes/vue-zzstudio",
+    }),
     // https://github.com/intlify/bundle-tools/tree/main/packages/unplugin-vue-i18n
     VueI18nPlugin({
       runtimeOnly: true,
